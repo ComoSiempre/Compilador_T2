@@ -1,12 +1,20 @@
 package scanner;
+
 import java_cup.runtime.*;
 import parser.*;
+
 %%
 %class Lexer
-%type Token
+%unicode
 %line
 %column
 %cup
+
+%{
+
+%}
+
+
 LETRA = [a-zA-Z]
 DIGITO = [0-9]
 NUMERO = {DIGITO} | [1-9]{DIGITO}*
@@ -25,10 +33,8 @@ multiComment   = "/#"[^#]~"#/" | "/#" "#"+ "/"  /* "/#"~"#/" */
 lineComment     = "%" {InputCharacter}* {SALTO}?
 ESPACIOS     = {SALTO} | [ \t\f] /*tabulaciones o saltos de linea (whitespace)*/
 
-%{
-
-%}
 %%
+
 {SALTO} {/*Ignorar*/}
 {ESPACIOS} {/*Ignorar*/}
 {Commentario} {/*ignorar*/}

@@ -68,7 +68,7 @@ public class Compilador {
             }
 
         } else {
-            System.out.println("\n*** Codigo no existente ***\n");
+            System.out.println("\n*** Codigo lexer no existente ***\n");
         }
         return efectuado;
     }
@@ -96,7 +96,7 @@ public class Compilador {
             }
 
         } else {
-            System.out.println("\n*** Codigo no existente ***\n");
+            System.out.println("\n*** Codigo parser no existente ***\n");
         }
         return efectuado;
     }
@@ -123,10 +123,13 @@ public class Compilador {
         //variable usada para guardar la direccion del archivo .flex
         String pathFlex=dir+"/src/scanner/Lexer.flex";
         String pathParser=dir+"/src/parser/Parser.cup";
+        
         //se llama a la funcion de generacion de lexer. 
         generarLexer(pathFlex);
+        //se llama a la funcion de generacion de parser.
         generarParser(pathParser);
-        move();    
+        //se mueven los archivos a los paquetes correspondientes.
+        //move();    
     }
     
 }

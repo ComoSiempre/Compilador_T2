@@ -1,5 +1,6 @@
 package parser;
 
+import scanner.*;
 
 /* Codigo del parser, se copia integramente a la clase final.
     Agregamos el manejo de errores. */
@@ -25,7 +26,7 @@ parser code {:
         report_error(message, info);
         //System.exit(1);
     }
-:}
+:};
 
 /* ------------Declaracion de simbolos terminales y no terminales---------- */
    
@@ -47,7 +48,42 @@ terminal String 	ID;
    y los que tengan un valor Object. Un Object se refiere a que
    no tienen tipo, pudiendo ser entero o String.
 */
-non terminal empty; //representaria en epsilon en cup.
+non terminal    program;
+non terminal    declaration_list;
+non terminal    declaration;
+non terminal    var_declaration;
+non terminal    fun_declaration;
+non terminal    type_specifier;
+non terminal    params;
+non terminal    param_list;
+non terminal    param;
+non terminal    compound_stmt;
+non terminal    local_declarations;
+non terminal    statement_list;
+non terminal    var_declarations;
+non terminal    statement;
+non terminal    expression_stmt;
+non terminal    selection_stmt;
+non terminal    iteration_stmt;
+non terminal    return_stmt;
+non terminal    expression;
+non terminal    while_stmt;
+non terminal    do_while_stmt;
+non terminal    for_stmt;
+non terminal    var;
+non terminal    simple_expression;
+non terminal    additive_expression;
+non terminal    relop;
+non terminal    addop;
+non terminal    term;
+non terminal    mulop;
+non terminal    factor;
+non terminal    powop;
+non terminal    exp;
+non terminal    call;
+non terminal    args;
+non terminal    arg_list;   
+non terminal    empty; //representaria en epsilon en cup.
 
 start with program;
 
