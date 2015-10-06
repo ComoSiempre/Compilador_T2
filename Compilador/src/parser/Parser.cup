@@ -200,7 +200,7 @@ return_stmt     ::=     RETURN PUNTOCOMA
                         {:
                         :};
 
-expression      ::=     var IGUALIGUAL expression
+expression      ::=     var ASSIGN expression
                         {:
                         :}
                         |
