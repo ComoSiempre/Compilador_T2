@@ -47,4 +47,285 @@ terminal String 	ID;
    y los que tengan un valor Object. Un Object se refiere a que
    no tienen tipo, pudiendo ser entero o String.
 */
+non terminal empty; //representaria en epsilon en cup.
 
+start with program;
+
+/* ------------------- Seccion de la gramatica ------------------------ */
+
+program     ::=     declaration_list
+                    {:
+
+                    :};
+
+declaration_list    ::=     declaration_list declaration
+                            {:
+
+                            :}
+                            |
+                            declaration
+                            {:
+
+                            :};
+
+declaration     ::=     var_declaration
+                        {:
+
+                        :}
+                        |
+                        fun_declaration
+                        {:
+                        :};
+
+var_declaration     ::=     type_specifier ID PUNTOCOMA
+                            {:
+                            :}
+                            |
+                            type_specifier ID CORCH_IZQ NUM CORCH_DER PUNTOCOMA
+                            {:
+                            :};
+
+type_specifier      ::=     INT
+                            {:
+                            :}
+                            |
+                            VOID
+                            {:
+                            :};
+
+fun_declaration     ::=     type_specifier ID PARENT_IZQ params PARENT_DER compound_stmt
+                            {:
+                            :};
+
+params      ::=     param_list
+                    {:
+                    :}
+                    |
+                    VOID
+                    {:
+                    :};
+
+param_list  ::=     param_list COMA param
+                    {:
+                    :}
+                    |
+                    param
+                    {:
+                    :};
+
+param   ::=     type_specifier ID
+                {:
+                :}
+                |
+                type_specifier ID CORCH_IZQ CORCH_DER
+                {:
+                :};
+
+compound_stmt   ::=     LLAVE_IZQ local_declarations statement_list LLAVE_DER
+                        {:
+                        :};
+
+local_declarations      ::=     local_declarations var_declarations
+                                {:
+                                :}
+                                |
+                                empty
+                                {:
+                                :}; 
+
+statement_list      ::=     statement_list statement
+                            {:
+                            :}
+                            |
+                            empty
+                            {:
+                            :};
+
+statement       ::=     expression_stmt
+                        {:
+                        :}
+                        |
+                        compound_stmt
+                        {:
+                        :}
+                        |
+                        selection_stmt
+                        {:
+                        :}
+                        |
+                        iteration_stmt
+                        {:
+                        :}
+                        return_stmt
+                        {:
+                        :};
+
+expression_stmt     ::=     expression PUNTOCOMA
+                            {:
+                            :}
+                            |
+                            PUNTOCOMA
+                            {:
+                            :};
+
+selection_stmt      ::=     IF PARENT_IZQ expression PARENT_DER statement
+                            {:
+                            :}
+                            |
+                            IF PARENT_IZQ expression PARENT_DER statement ELSE statement
+                            {:
+                            :};
+
+iteration_stmt      ::=     while_stmt
+                            {:
+                            :}
+                            |
+                            do_while_stmt
+                            {:
+                            :};
+
+while_stmt      ::=     WHILE PARENT_IZQ expression PARENT_DER statement
+                        {:
+                        :};
+
+for_stmt        ::=     FOR PARENT_IZQ expression COMA expression COMA expression PARENT_DER statement
+                        {:
+                        :};
+
+return_stmt     ::=     RETURN PUNTOCOMA
+                        {:
+                        :}
+                        |
+                        RETURN expression PUNTOCOMA
+                        {:
+                        :};
+
+expression      ::=     var IGUALIGUAL expression
+                        {:
+                        :}
+                        |
+                        simple_expression
+                        {:
+                        :};
+
+var         ::=     ID
+                    {:
+                    :}
+                    |
+                    ID CORCH_IZQ expression CORCH_DER
+                    {:
+                    :};
+
+simple_expression       ::=     additive_expression relop additive_expression
+                                {:
+                                :}
+                                |
+                                additive_expression
+                                {:
+                                :};
+
+relop       ::=     MENIGUAL
+                    {:
+                    :}
+                    MENOR
+                    {:
+                    :}
+                    MAYOR
+                    {:
+                    :}
+                    MAYIGUAL
+                    {:
+                    :}
+                    IGUALIGUAL
+                    {:
+                    :}
+                    DISTINTO
+                    {:
+                    :};
+
+additive_expression     ::=     additive_expression addop term
+                                {:
+                                :}
+                                |
+                                term
+                                {:
+                                :};
+
+addop       ::=     SUMA
+                    {:
+                    :}
+                    |
+                    RESTA
+                    {:
+                    :};
+
+term        ::=     term mulop factor
+                    {:
+                    :}
+                    |
+                    factor
+                    {:
+                    :};
+
+mulop       ::=     MULTIPLICACION
+                    {:
+                    :}
+                    |
+                    DIVISION
+                    {:
+                    :};
+
+factor      ::=     factor powop exp
+                    {:
+                    :}
+                    |
+                    exp
+                    {:
+                    :};
+
+powop       ::=     EXPONENCIACION_1 //^
+                    {:
+                    :}
+                    |
+                    EXPONENCIACION_2 //**
+                    {:
+                    :};                                                                                                                                                                                                                                                                                        
+
+exp         ::=     PARENT_IZQ expression PARENT_DER
+                    {:
+                    :}
+                    |
+                    var
+                    {:
+                    :}
+                    |
+                    call
+                    {:
+                    :}
+                    |
+                    NUM
+                    {:
+                    :};
+
+call    ::=     ID PARENT_IZQ args PARENT_DER
+                {:
+                :};
+
+args    ::=     arg_list
+                {:
+                :}
+                |
+                empty
+                {:
+                :};
+
+arg_list    ::=     arg_list COMA expression
+                    {:
+                    :}
+                    |
+                    expression
+                    {:
+                    :};
+
+/* Gramatica nesesaria */
+empty   ::= /* vacio */;                                                   
