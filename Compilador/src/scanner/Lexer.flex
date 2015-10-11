@@ -70,5 +70,5 @@ ESPACIOS     = {SALTO} | [ \t\f] /*tabulaciones o saltos de linea (whitespace)*/
 
 ([a-z]){LETRA}*_?{LETRA}*{DIGITO}* {return new Symbol(sym.ID,yyline,yycolumn,yytext());}
 {NUMERO} {return new Symbol(sym.NUM,yyline,yycolumn,yytext());}
-. {return new Symbol(sym.ERROR,yyline,yycolumn,yytext());}
+. {System.out.println("Error Lexico: linea "+(yyline)+" columna "+(yycolumn)+ " token: "+yytext());}
 

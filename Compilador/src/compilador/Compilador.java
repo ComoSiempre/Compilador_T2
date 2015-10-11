@@ -32,6 +32,7 @@ public class Compilador {
     public static void generarParser(String path){
         String[] asintactico = { "-parser", "Parser", path };
         try {
+            
             java_cup.Main.main(asintactico);
         } catch (Exception ex) {
             //System.out.println(ex.getMessage());
@@ -121,15 +122,15 @@ public class Compilador {
         //variable donde obtengo la direccion del proyecto.
         final String dir =System.getProperty("user.dir");
         //variable usada para guardar la direccion del archivo .flex
-        String pathFlex=dir+"/src/scanner/Lexer.flex";
-        String pathParser=dir+"/src/parser/Parser.cup";
+        String pathFlex=dir+"\\src\\scanner\\Lexer.flex";
+        String pathParser=dir+"\\src\\parser\\Parser.cup";
         
         //se llama a la funcion de generacion de lexer. 
         generarLexer(pathFlex);
         //se llama a la funcion de generacion de parser.
         generarParser(pathParser);
         //se mueven los archivos a los paquetes correspondientes.
-        //move();    
+        move();    
     }
     
 }
