@@ -2,6 +2,8 @@ package parser;
 
 import java_cup.runtime.*;
 import scanner.*;
+import ast.*;
+import Tables.*;
 
 /* Codigo del parser, se copia integramente a la clase final.
     Agregamos el manejo de errores. */
@@ -49,12 +51,12 @@ terminal String 	ID;
    y los que tengan un valor Object. Un Object se refiere a que
    no tienen tipo, pudiendo ser entero o String.
 */
-non terminal    program;
-non terminal    declaration_list;
-non terminal    declaration;
-non terminal    var_declaration;
+non terminal    Program    program;
+non terminal    Program    declaration_list;
+non terminal    Nodo    declaration;
+non terminal    Nodo    var_declaration;
 non terminal    fun_declaration;
-non terminal    type_specifier;
+non terminal    String    type_specifier;
 non terminal    params;
 non terminal    param_list;
 non terminal    param;
@@ -69,17 +71,16 @@ non terminal    iteration_stmt;
 non terminal    return_stmt;
 non terminal    expression;
 non terminal    while_stmt;
-non terminal    do_while_stmt;
 non terminal    for_stmt;
 non terminal    var;
 non terminal    simple_expression;
 non terminal    additive_expression;
-non terminal    relop;
-non terminal    addop;
+non terminal    String    relop;
+non terminal    String    addop;
 non terminal    term;
-non terminal    mulop;
+non terminal    String    mulop;
 non terminal    factor;
-non terminal    powop;
+non terminal    String    powop;
 non terminal    exp;
 non terminal    call;
 non terminal    args;
@@ -91,44 +92,65 @@ start with program;
 
 /* ------------------- Seccion de la gramatica ------------------------ */
 
-program     ::=     declaration_list
+program     ::=     declaration_list:dl
                     {:
-
+                        System.out.println("Fin analisis sintactico.");
+                        RESULT=dl; //envio la raiz para ser dibujado en grapher
                     :};
 
-declaration_list    ::=     declaration_list declaration
+declaration_list    ::=     declaration_list:list declaration:d
                             {:
-
+                                if(d != null){
+                                    list.agregarDeclaracion(d);
+                                }else{
+                                    //no deberia llegar nunca aqui.
+                                    list = new Program();
+                                }
+                                RESULT=list;
                             :}
                             |
-                            declaration
+                            declaration:d
                             {:
-
+                                Program lista = new Program();
+                                lista.agregarDeclaracion(d);
+                                RESULT=lista;
                             :};
 
-declaration     ::=     var_declaration
+declaration     ::=     var_declaration:v
                         {:
-
+                            RESULT=v;
                         :}
                         |
                         fun_declaration
                         {:
                         :};
 
-var_declaration     ::=     type_specifier ID PUNTOCOMA
+var_declaration     ::=     type_specifier:te ID:id PUNTOCOMA
                             {:
+                                if(te.equalsIgnoreCase("int")){
+                                    RESULT= new VarDec("INT",id, false);
+                                }else{
+                                    RESULT=new VarDec("VOID",id, false);
+                                }
                             :}
                             |
-                            type_specifier ID CORCH_IZQ NUM CORCH_DER PUNTOCOMA
+                            type_specifier:te ID:id CORCH_IZQ NUM:num CORCH_DER PUNTOCOMA
                             {:
+                                if(te.equalsIgnoreCase("int")){
+                                    RESULT= new VarDec("INT", id, true, Integer.parseInt(num));
+                                }else{
+                                    RESULT=new VarDec("VOID", id, true, Integer.parseInt(num));
+                                }
                             :};
 
-type_specifier      ::=     INT
+type_specifier      ::=     INT:i
                             {:
+                                RESULT=i;
                             :}
                             |
-                            VOID
+                            VOID:v
                             {:
+                                RESULT=v;
                             :};
 
 fun_declaration     ::=     type_specifier ID PARENT_IZQ params PARENT_DER compound_stmt
@@ -206,7 +228,7 @@ expression_stmt     ::=     expression PUNTOCOMA
                             {:
                             :};
 
-selection_stmt      ::=     IF PARENT_IZQ expression PARENT_DER statement
+selection_stmt      ::=     IF PARENT_IZQ expression PARENT_DER statement 
                             {:
                             :}
                             |
@@ -218,7 +240,7 @@ iteration_stmt      ::=     while_stmt
                             {:
                             :}
                             |
-                            do_while_stmt
+                            for_stmt
                             {:
                             :};
 
@@ -262,23 +284,29 @@ simple_expression       ::=     additive_expression relop additive_expression
                                 {:
                                 :};
 
-relop       ::=     MENIGUAL
+relop       ::=     MENIGUAL:me
                     {:
+                        RESULT=me;
                     :}
-                    MENOR
+                    MENOR:men
                     {:
+                        RESULT=men;
                     :}
-                    MAYOR
+                    MAYOR:ma
                     {:
+                        RESULT=ma;
                     :}
-                    MAYIGUAL
+                    MAYIGUAL:may
                     {:
+                        RESULT=may;
                     :}
-                    IGUALIGUAL
+                    IGUALIGUAL:ii
                     {:
+                        RESULT=ii;
                     :}
-                    DISTINTO
+                    DISTINTO:dis
                     {:
+                        RESULT=dis;
                     :};
 
 additive_expression     ::=     additive_expression addop term
@@ -289,12 +317,14 @@ additive_expression     ::=     additive_expression addop term
                                 {:
                                 :};
 
-addop       ::=     SUMA
+addop       ::=     SUMA:sum
                     {:
+                        RESULT=sum;
                     :}
                     |
-                    RESTA
+                    RESTA:res
                     {:
+                        RESULT=res;
                     :};
 
 term        ::=     term mulop factor
@@ -305,12 +335,14 @@ term        ::=     term mulop factor
                     {:
                     :};
 
-mulop       ::=     MULTIPLICACION
+mulop       ::=     MULTIPLICACION:mu
                     {:
+                        RESULT=mu;
                     :}
                     |
-                    DIVISION
+                    DIVISION:div
                     {:
+                        RESULT=div;
                     :};
 
 factor      ::=     factor powop exp
@@ -321,12 +353,14 @@ factor      ::=     factor powop exp
                     {:
                     :};
 
-powop       ::=     EXPONENCIACION_1 //^
+powop       ::=     EXPONENCIACION_1:exp1 //^
                     {:
+                        RESULT=exp1;
                     :}
                     |
-                    EXPONENCIACION_2 //**
+                    EXPONENCIACION_2:exp2 //**
                     {:
+                        RESULT=exp2;
                     :};                                                                                                                                                                                                                                                                                        
 
 exp         ::=     PARENT_IZQ expression PARENT_DER

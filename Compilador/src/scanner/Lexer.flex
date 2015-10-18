@@ -2,9 +2,11 @@ package scanner;
 
 import java_cup.runtime.*;
 import parser.*;
+import Tables.*;
 
 %%
 %class Lexer
+%public
 %unicode
 %line
 %column

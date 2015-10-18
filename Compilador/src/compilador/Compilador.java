@@ -10,6 +10,12 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import ast.*;
+import Tables.*;
+import java.io.FileReader;
+import parser.*;
+import scanner.*;
+import syntaxVisitor.GrapherVisitor;
 
 
 /**
@@ -101,6 +107,7 @@ public class Compilador {
         }
         return efectuado;
     }
+    
     /**
      * metodo usado para mover los archivos a sus respectivos paquetes.
      */
@@ -113,6 +120,19 @@ public class Compilador {
             System.exit(0);
         }
 	
+    }
+    
+    public static void compilar(String pathEjercicio, String pathBase){
+        File arch = new File(pathEjercicio);
+        try{
+            Lexer lexer = new Lexer(new FileReader(arch));
+            Parser parser = new Parser(lexer);
+            Program programa = (Program) parser.parse().value;
+            GrapherVisitor grapher = new GrapherVisitor(pathBase);
+            grapher.visitar(programa);
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
     }
     /**
      * @param args the command line arguments
@@ -130,7 +150,10 @@ public class Compilador {
         //se llama a la funcion de generacion de parser.
         generarParser(pathParser);
         //se mueven los archivos a los paquetes correspondientes.
-        move();    
+        move();
+        //comienza compilacion de ejercicios.
+        compilar(dir+"/ejemplo_1.txt",dir);
+        
     }
     
 }

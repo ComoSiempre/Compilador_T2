@@ -1,0 +1,4 @@
+int a;
+int a_b3;
+int bcfg;
+void adfg;

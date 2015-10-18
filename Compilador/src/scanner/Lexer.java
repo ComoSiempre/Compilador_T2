@@ -4,6 +4,7 @@ package scanner;
 
 import java_cup.runtime.*;
 import parser.*;
+import Tables.*;
 
 
 /**
@@ -11,7 +12,7 @@ import parser.*;
  * <a href="http://www.jflex.de/">JFlex</a> 1.6.1
  * from the specification file <tt>C:/Users/jona/Documents/NetBeansProjects/Compilador_T2/Compilador/src/scanner/Lexer.flex</tt>
  */
-class Lexer implements java_cup.runtime.Scanner {
+public class Lexer implements java_cup.runtime.Scanner {
 
   /** This character denotes the end of file */
   public static final int YYEOF = -1;
@@ -317,7 +318,7 @@ class Lexer implements java_cup.runtime.Scanner {
    *
    * @param   in  the java.io.Reader to read input from.
    */
-  Lexer(java.io.Reader in) {
+  public Lexer(java.io.Reader in) {
     this.zzReader = in;
   }
 

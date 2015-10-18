@@ -5,10 +5,13 @@
  */
 package visitor;
 
+import ast.*;
 /**
- *
- * @author jona
+ * Interface entre los nodos y el GrapherVisitor.
+ * nesesario para la utilizacion del patron visitor.
+ * @author Jonathan Vasquez - Eduardo Tapia
  */
 public interface visitor {
-    
+    public void visitar(Program program);
+    public void visitar(VarDec vardeclaration);
 }

@@ -1,0 +1,11 @@
+digraph G { 
+"nodo0"[label="Progama"]; 
+"nodo1"[label="a:INT"]; 
+"nodo0"->"nodo1"; 
+"nodo2"[label="a_b3:INT"]; 
+"nodo0"->"nodo2"; 
+"nodo3"[label="bcfg:INT"]; 
+"nodo0"->"nodo3"; 
+"nodo4"[label="adfg:VOID"]; 
+"nodo0"->"nodo4"; 
+}
