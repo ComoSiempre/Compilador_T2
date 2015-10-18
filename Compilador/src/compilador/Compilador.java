@@ -121,7 +121,12 @@ public class Compilador {
         }
 	
     }
-    
+    /**
+     * Metodo utilizado para el proceso de compilacion de los ejercicios utilizando
+     * las fases de analisis lexico y sintactico.
+     * @param pathEjercicio la direccion del ejercicio a compilar
+     * @param pathBase la direccion base del proyecto.
+     */
     public static void compilar(String pathEjercicio, String pathBase){
         File arch = new File(pathEjercicio);
         try{

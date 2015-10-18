@@ -14,4 +14,8 @@ import ast.*;
 public interface visitor {
     public void visitar(Program program);
     public void visitar(VarDec vardeclaration);
+    public void visitar(FunDec function);
+    public void visitar(Param parametro);
+    public void visitar (Compound componente);
+    
 }

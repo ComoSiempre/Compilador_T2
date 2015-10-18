@@ -97,5 +97,67 @@ public class GrapherVisitor implements visitor {
         //cuanto como nodo visitado.
         this.cantNodosVisitados++;
     }
+
+    @Override
+    public void visitar(FunDec function) {
+        //obtengo el ident del nodo funcion.
+        String ident = function.toGrapher(this.cantNodosVisitados);
+        //agrego el ident a la cadena de codigo graph.
+        this.codigoGraph += ident;
+        String [] delimitador= ident.split("\\[");
+        //creo el enlace del padre con el nuevo nodo funcion.
+        String enlace = this.auxPadres.peek()+"->"+delimitador[0]+"; \n";
+        //guardo el enlace en el codigo.
+        this.codigoGraph += enlace;
+        //guardo el nuevo nodo en la pila.
+        this.auxPadres.push(delimitador[0]);
+        //cuento como nodo visitado.
+        this.cantNodosVisitados++;
+        //visito los nodos de parametros.
+        for(Nodo nodo : function.getListaParametros()){
+            nodo.aceptar(this);
+        }
+        //visito el nodo Compound.
+        function.getCompound().aceptar(this);
+        //elimino el padre de la pila . (raiz del sub arbol contando desde aqui).
+        this.auxPadres.pop();
+    }
+
+    @Override
+    public void visitar(Param parametro) {
+        //enlazo el codigo del nodo param a la cadena de codigo general del graphviz. 
+        this.codigoGraph += parametro.toGrapher(this.auxPadres.peek(), this.cantNodosVisitados);
+        //cuento como nodo visitado.
+        this.cantNodosVisitados++;
+    }
+
+    @Override
+    public void visitar(Compound componente) {
+        //obtengo el codigo del nodo Compound.
+        String ident = componente.toGrapher(this.cantNodosVisitados);
+        //se une con la cadena general de codigo graphviz.
+        this.codigoGraph += ident;
+        String [] delimitador = ident.split("\\[");
+        //creo el enlace del padre con el nuevo nodo Compound.
+        String enlace = this.auxPadres.peek()+"->"+delimitador[0]+"; \n";
+        //se une el codigo a l codigo general.
+        this.codigoGraph += enlace;
+        //guardo en la pila al padre.
+        this.auxPadres.push(delimitador[0]);
+        //cuento como nodo visitado.
+        this.cantNodosVisitados++;
+        //visito los nodos de variables locales.
+        for(Nodo nodo : componente.getLocalVar()){
+            nodo.aceptar(this);
+        }
+        //visito los nodos de sentencias.
+        for(Nodo nodo : componente.getStatements()){
+            nodo.aceptar(this);
+            
+        }
+        
+        //elimino el padre de la pila.
+        this.auxPadres.pop();
+    }
     
 }

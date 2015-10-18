@@ -1,4 +1,10 @@
 int a;
 int a_b3;
-int bcfg;
+int bcfg[3];
 void adfg;
+
+int main(int a, int b[]){
+	int x;
+	int y;
+
+}

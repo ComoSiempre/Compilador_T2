@@ -1,6 +1,7 @@
 package parser;
 
 import java_cup.runtime.*;
+import java.util.ArrayList;
 import scanner.*;
 import ast.*;
 import Tables.*;
@@ -55,16 +56,15 @@ non terminal    Program    program;
 non terminal    Program    declaration_list;
 non terminal    Nodo    declaration;
 non terminal    Nodo    var_declaration;
-non terminal    fun_declaration;
+non terminal    Nodo    fun_declaration;
 non terminal    String    type_specifier;
-non terminal    params;
-non terminal    param_list;
-non terminal    param;
-non terminal    compound_stmt;
-non terminal    local_declarations;
-non terminal    statement_list;
-non terminal    var_declarations;
-non terminal    statement;
+non terminal    Nodo    params;
+non terminal    Nodo    param_list;
+non terminal    Nodo    param;
+non terminal    Nodo    compound_stmt;
+non terminal    ArrayList<Nodo>    local_declarations;
+non terminal    ArrayList<Nodo>    statement_list;
+non terminal    Nodo    statement;
 non terminal    expression_stmt;
 non terminal    selection_stmt;
 non terminal    iteration_stmt;
@@ -121,8 +121,9 @@ declaration     ::=     var_declaration:v
                             RESULT=v;
                         :}
                         |
-                        fun_declaration
+                        fun_declaration:f
                         {:
+                            RESULT=f;
                         :};
 
 var_declaration     ::=     type_specifier:te ID:id PUNTOCOMA
@@ -153,52 +154,106 @@ type_specifier      ::=     INT:i
                                 RESULT=v;
                             :};
 
-fun_declaration     ::=     type_specifier ID PARENT_IZQ params PARENT_DER compound_stmt
+fun_declaration     ::=     type_specifier:t ID:id PARENT_IZQ params:pa PARENT_DER compound_stmt:com
                             {:
+                                //ingreso la id al nodo anteriormente creado.
+                                ((FunDec) pa).setID(id);
+                                //ingreso el tipo de funcion al nodo anteriormente creado.
+                                ((FunDec) pa).setTipoFunction(t);
+
+                                //condicionante usado si los componentes existen o no.
+                                if(com != null){
+                                    ((FunDec) pa).setCompound_stmt(com);
+                                }
+                                RESULT=(Nodo) pa;
+
                             :};
 
-params      ::=     param_list
+params      ::=     param_list:lista
                     {:
+                        RESULT=lista;
                     :}
                     |
-                    VOID
+                    VOID:v
                     {:
+                        //se crea el nodo directamente sin parametros.
+                        RESULT=new FunDec(true);
                     :};
 
-param_list  ::=     param_list COMA param
+param_list  ::=     param_list:list COMA param:p
                     {:
+                        //condicionante si el parametro no es nulo. en ese caso se agrega a la lista de paramentros del nodo Funcion.
+                        if(p != null){
+                            ((FunDec)list).agregarParametro(p);
+                        }else{
+                            //nunca entra aqui.
+                            list=new FunDec();
+                        }
+                        RESULT=list;
                     :}
                     |
-                    param
+                    param:p
                     {:
+                        //creo el nodo de la funcion quen contendra la lista de parametros.
+                        FunDec list= new FunDec();
+                        //agrego el parametro a la lista del nodo.
+                        list.agregarParametro(p);
+                        RESULT=list;
                     :};
 
-param   ::=     type_specifier ID
+param   ::=     type_specifier:t ID:id
                 {:
+                    //se crea el nodo parametro.
+                    RESULT=new Param(t,id,false);
                 :}
                 |
-                type_specifier ID CORCH_IZQ CORCH_DER
+                type_specifier:t ID:id CORCH_IZQ CORCH_DER
                 {:
+                    //se crea el nodo parametro (parametro vector).
+                    RESULT=new Param(t, id, true);
                 :};
 
-compound_stmt   ::=     LLAVE_IZQ local_declarations statement_list LLAVE_DER
+compound_stmt   ::=     LLAVE_IZQ local_declarations:list_dec statement_list:list_sta LLAVE_DER
                         {:
+                            RESULT= new Compound(list_dec,list_sta);
                         :};
 
-local_declarations      ::=     local_declarations var_declarations
+local_declarations      ::=     local_declarations:list var_declaration:var
                                 {:
+                                    //condicionante usado si el nodo variable es nulo.
+                                    if(var != null){
+                                        list.add(var);
+                                    }else{
+                                        //no entra aqui.
+                                        list=new ArrayList<Nodo>();
+                                    }
+                                    RESULT=list;
                                 :}
                                 |
                                 empty
                                 {:
+                                    //se crea la lista de nodos de variables locales.
+                                    ArrayList<Nodo> list = new ArrayList<Nodo>();
+                                    RESULT=list;//se envia la lista creada.
                                 :}; 
 
-statement_list      ::=     statement_list statement
+statement_list      ::=     statement_list:list statement:sta
                             {:
+                                //condicionante usado si el nodo Statement es nulo.
+                                if(sta != null){
+                                    list.add(sta);
+                                }else{
+                                    //no deberia entrar aqui.
+                                    list= new ArrayList<Nodo>();
+                                }
+                                RESULT=list;
                             :}
                             |
                             empty
                             {:
+                                //se crea la lista de nodos de statements.
+                                ArrayList<Nodo> list = new ArrayList<Nodo>();
+                                RESULT=list;//se envia la lista creada.
                             :};
 
 statement       ::=     expression_stmt
