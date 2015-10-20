@@ -65,24 +65,24 @@ non terminal    Nodo    compound_stmt;
 non terminal    ArrayList<Nodo>    local_declarations;
 non terminal    ArrayList<Nodo>    statement_list;
 non terminal    Nodo    statement;
-non terminal    expression_stmt;
-non terminal    selection_stmt;
-non terminal    iteration_stmt;
-non terminal    return_stmt;
-non terminal    expression;
+non terminal    Nodo    expression_stmt;
+non terminal    Nodo    selection_stmt;
+non terminal    Nodo    iteration_stmt;
+non terminal    Nodo    return_stmt;
+non terminal    Nodo    expression;
 non terminal    while_stmt;
 non terminal    for_stmt;
-non terminal    var;
-non terminal    simple_expression;
-non terminal    additive_expression;
+non terminal    Nodo    var;
+non terminal    Nodo    simple_expression;
+non terminal    Nodo    additive_expression;
 non terminal    String    relop;
 non terminal    String    addop;
-non terminal    term;
+non terminal    Nodo    term;
 non terminal    String    mulop;
-non terminal    factor;
+non terminal    Nodo    factor;
 non terminal    String    powop;
-non terminal    exp;
-non terminal    call;
+non terminal    Nodo    exp;
+non terminal    Nodo    call;
 non terminal    args;
 non terminal    arg_list;   
 non terminal    empty; //representaria en epsilon en cup.
@@ -256,27 +256,39 @@ statement_list      ::=     statement_list:list statement:sta
                                 RESULT=list;//se envia la lista creada.
                             :};
 
-statement       ::=     expression_stmt
+statement       ::=     expression_stmt:ex
                         {:
+                            //corresponde a un numero. lo que seria muy extraño, ¿la gramatica aceptaria '1;' sin asignacion a variable?
+                            //if(ex instanceof String){
+                            //    RESULT=new Var(Integer.parseInt((String)ex));
+                            //}else{
+                            //    RESULT=(Nodo)ex; //en teoria esta mal, pero se parsea ya que es feo que llege al 'num;'.    
+                            //}
+                            RESULT=ex;
                         :}
                         |
-                        compound_stmt
+                        compound_stmt:com
                         {:
+                            RESULT=com;
                         :}
                         |
-                        selection_stmt
+                        selection_stmt:sel
                         {:
+                            RESULT=sel;
                         :}
                         |
-                        iteration_stmt
+                        iteration_stmt:ite
                         {:
+                            RESULT=ite;
                         :}
-                        return_stmt
+                        return_stmt:ret
                         {:
+                            RESULT=ret;
                         :};
 
-expression_stmt     ::=     expression PUNTOCOMA
+expression_stmt     ::=     expression:e PUNTOCOMA
                             {:
+                                RESULT=e;
                             :}
                             |
                             PUNTOCOMA
@@ -315,28 +327,63 @@ return_stmt     ::=     RETURN PUNTOCOMA
                         {:
                         :};
 
-expression      ::=     var ASSIGN expression
+expression      ::=     var:v ASSIGN:as expression:ex
                         {:
+                            //desde aqui las derivaciones por la derecha pueden ser nodos (Call, Var o Expression) 
+                            //o NUM (como String, pero guardado en el nodo como Integer).
+                            //por lo que es nesesario diferenciar el guardado en el nodo.
+                            //if(ex instanceof String){
+                            //    //expression correpsonde a un numero.
+                            //    RESULT=new Expression(v,as,Integer.parseInt((String)ex));
+                            //}else{
+                            //    //corresponde a un Nodo.
+                            //    RESULT=new Expression(v,as,(Nodo)ex);
+                            //}
+                            //creo el nodo expresion con los datos de operador.
+                            RESULT=new Expression(v,as,ex);
                         :}
                         |
-                        simple_expression
+                        simple_expression:si
                         {:
+                            RESULT=si;
                         :};
 
-var         ::=     ID
+var         ::=     ID:id
                     {:
+                        //se crea el nodo Var.
+                        RESULT= new Var(id);
                     :}
                     |
-                    ID CORCH_IZQ expression CORCH_DER
+                    ID:id CORCH_IZQ expression:ex CORCH_DER
                     {:
+                        //se crea el Nodo Var con un id y un Nodo expresion que puede ser un Nodo o un Numero.
+                        //if(ex instanceof Nodo){
+                        //    RESULT= new Var(id,(Nodo)ex);    
+                        //}else{
+                        //    RESULT= new Var(id,Integer.parseInt((String)ex));
+                        //}
+                        RESULT= new Var(id,ex);
                     :};
 
-simple_expression       ::=     additive_expression relop additive_expression
+simple_expression       ::=     additive_expression:a relop:ope additive_expression:b
                                 {:
+                                    //se condicionan todas las opciones posibles de derivaciones.
+                                    //if(a instanceof String && b instanceof String){
+                                    //    RESULT=new Expression(Integer.parseInt((String)a),ope,Integer.parseInt((String)b));
+                                    //}else if(a instanceof String && b instanceof Nodo){
+                                    //    RESULT=new Expression(Integer.parseInt((String)a),ope,(Nodo)b);
+                                    //}else if(a instanceof Nodo && b instanceof String){
+                                    //    RESULT=new Expression((Nodo)a,ope,Integer.parseInt((String)b));
+                                    //}else if(a instanceof Nodo && b instanceof Nodo){
+                                    //    RESULT=new Expression((Nodo)a,ope,(Nodo)b);
+                                    //}
+                                    //se crea el Nodo expresion con la nueva operacion.
+                                    RESULT=new Expression(a, ope, b);
                                 :}
                                 |
-                                additive_expression
+                                additive_expression:ad
                                 {:
+                                    RESULT=ad;
                                 :};
 
 relop       ::=     MENIGUAL:me
@@ -364,12 +411,25 @@ relop       ::=     MENIGUAL:me
                         RESULT=dis;
                     :};
 
-additive_expression     ::=     additive_expression addop term
+additive_expression     ::=     additive_expression:a addop:ope term:b
                                 {:
+
+                                    //otra nueva operacion. se crea otro nodo.
+                                    //if(a instanceof String && b instanceof String){
+                                    //    RESULT=new Expression(Integer.parseInt((String)a),ope,Integer.parseInt((String)b));
+                                    //}else if(a instanceof String && b instanceof Nodo){
+                                    //    RESULT=new Expression(Integer.parseInt((String)a),ope,(Nodo)b);
+                                    //}else if(a instanceof Nodo && b instanceof String){
+                                    //    RESULT=new Expression((Nodo)a,ope,Integer.parseInt((String)b));
+                                    //}else if(a instanceof Nodo && b instanceof Nodo){
+                                    //    RESULT=new Expression((Nodo)a,ope,(Nodo)b);
+                                    //}
+                                    RESULT=new Expression(a,ope,b);
                                 :}
                                 |
-                                term
+                                term:t
                                 {:
+                                    RESULT=t;
                                 :};
 
 addop       ::=     SUMA:sum
@@ -382,12 +442,24 @@ addop       ::=     SUMA:sum
                         RESULT=res;
                     :};
 
-term        ::=     term mulop factor
+term        ::=     term:a mulop:ope factor:b
                     {:
+                        //nueva operacion, creacion de nuevo nodo Expression.
+                        //if(a instanceof String && b instanceof String){
+                        //    RESULT=new Expression(Integer.parseInt((String)a),ope,Integer.parseInt((String)b));
+                        //}else if(a instanceof String && b instanceof Nodo){
+                        //    RESULT=new Expression(Integer.parseInt((String)a),ope,(Nodo)b);
+                        //}else if(a instanceof Nodo && b instanceof String){
+                        //    RESULT=new Expression((Nodo)a,ope,Integer.parseInt((String)b));
+                        //}else if(a instanceof Nodo && b instanceof Nodo){
+                        //    RESULT=new Expression((Nodo)a,ope,(Nodo)b);
+                        //}
+                        RESULT=new Expression(a,ope,b);
                     :}
                     |
-                    factor
+                    factor:f
                     {:
+                        RESULT=f;
                     :};
 
 mulop       ::=     MULTIPLICACION:mu
@@ -400,12 +472,25 @@ mulop       ::=     MULTIPLICACION:mu
                         RESULT=div;
                     :};
 
-factor      ::=     factor powop exp
+factor      ::=     factor:a powop:ope exp:b
                     {:
+                        //nueva operacion, se crea nuevo nodo Expression.
+                        //if(a instanceof String && b instanceof String){
+                        //                RESULT=new Expression(Integer.parseInt((String)a),ope,Integer.parseInt((String)b));
+                        //            }else if(a instanceof String && b instanceof Nodo){
+                        //                RESULT=new Expression(Integer.parseInt((String)a),ope,(Nodo)b);
+                        //            }else if(a instanceof Nodo && b instanceof String){
+                        //                RESULT=new Expression((Nodo)a,ope,Integer.parseInt((String)b));
+                        //            }else if(a instanceof Nodo && b instanceof Nodo){
+                        //                RESULT=new Expression((Nodo)a,ope,(Nodo)b);
+                        //            }
+                        //si no funciona, usar el condicionante. (por probar).
+                        RESULT=new Expression(a,ope,b);
                     :}
                     |
-                    exp
+                    exp:e //puede llegar como Nodo o numero.
                     {:
+                        RESULT=e;
                     :};
 
 powop       ::=     EXPONENCIACION_1:exp1 //^
@@ -418,20 +503,27 @@ powop       ::=     EXPONENCIACION_1:exp1 //^
                         RESULT=exp2;
                     :};                                                                                                                                                                                                                                                                                        
 
-exp         ::=     PARENT_IZQ expression PARENT_DER
+exp         ::=     PARENT_IZQ expression:ex PARENT_DER
                     {:
+                        RESULT=ex;
                     :}
                     |
-                    var
+                    var:v
                     {:
+                        RESULT=v;
                     :}
                     |
-                    call
+                    call:c
                     {:
+                        RESULT=c;
                     :}
                     |
-                    NUM
+                    NUM:num
                     {:
+                        //creo el nodo var que guardara el numero.
+                        RESULT=new Var(Integer.parseInt(num));
+
+                        
                     :};
 
 call    ::=     ID PARENT_IZQ args PARENT_DER

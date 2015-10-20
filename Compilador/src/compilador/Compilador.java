@@ -128,6 +128,7 @@ public class Compilador {
      * @param pathBase la direccion base del proyecto.
      */
     public static void compilar(String pathEjercicio, String pathBase){
+        System.out.println("Comienzo compilacion");
         File arch = new File(pathEjercicio);
         try{
             Lexer lexer = new Lexer(new FileReader(arch));
@@ -137,6 +138,9 @@ public class Compilador {
             grapher.visitar(programa);
         }catch(Exception ex){
             ex.printStackTrace();
+            
+            
+            
         }
     }
     /**

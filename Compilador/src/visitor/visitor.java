@@ -16,6 +16,7 @@ public interface visitor {
     public void visitar(VarDec vardeclaration);
     public void visitar(FunDec function);
     public void visitar(Param parametro);
-    public void visitar (Compound componente);
-    
+    public void visitar(Compound componente);
+    public void visitar(Expression expresion);
+    public void visitar(Var var);
 }

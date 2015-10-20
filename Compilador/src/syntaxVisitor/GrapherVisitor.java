@@ -159,5 +159,103 @@ public class GrapherVisitor implements visitor {
         //elimino el padre de la pila.
         this.auxPadres.pop();
     }
+
+    @Override
+    public void visitar(Expression expresion) {
+        String ident= expresion.toGrapher(this.cantNodosVisitados);
+        this.codigoGraph +=ident;
+        String [] delimitador = ident.split("\\[");
+        String enlace = this.auxPadres.peek()+"->"+delimitador[0]+"; \n";
+        this.codigoGraph += enlace;
+        this.auxPadres.push(delimitador[0]);
+        this.cantNodosVisitados++;
+        expresion.getOperador1().aceptar(this);
+        expresion.getOperador2().aceptar(this);
+//        
+//        //condicionantes para visitar las derivaciones segun corresponda.
+//        if(expresion.getOperador1() instanceof Nodo && expresion.getOperador2() instanceof Nodo){
+//            ((Nodo)expresion.getOperador1()).aceptar(this);
+//            ((Nodo)expresion.getOperador2()).aceptar(this);
+//            
+//        }else if(expresion.getOperador1() instanceof Integer && expresion.getOperador2() instanceof Nodo){
+//            //se crea el codigo del nuemro en la cadena de codigo graphviz.
+//            this.codigoGraph += this.auxPadres.peek()+"->"+(Integer)expresion.getOperador1()+"; \n";
+//            ((Nodo)expresion.getOperador2()).aceptar(this);
+//        }else if(expresion.getOperador1() instanceof Nodo && expresion.getOperador2() instanceof Integer){
+//            ((Nodo)expresion.getOperador1()).aceptar(this);
+//            this.codigoGraph += this.auxPadres.peek()+"->"+(Integer)expresion.getOperador2()+"; \n";
+//        }else if(expresion.getOperador1() instanceof Integer && expresion.getOperador2() instanceof Integer){
+//            this.codigoGraph += this.auxPadres.peek()+"->"+(Integer)expresion.getOperador1()+"; \n";
+//            this.codigoGraph += this.auxPadres.peek()+"->"+(Integer)expresion.getOperador2()+"; \n";
+//        }
+        this.auxPadres.pop();
+    }
+
+    @Override
+    public void visitar(Var var) {
+        String ident="";
+        //se verifica si el nodo es un terminal.
+        if(var.getExpression()==null){
+            //terminal.
+            //Verifico si es un nodo terminal de ID (gramatica 21) o de num(gramatica 30).
+            if(var.getID()==null){
+                //el nodo corresponde a nodo numero.
+                ident=var.toGrapherNumero(this.cantNodosVisitados);
+            }else{
+                //el nodo  corresponde al ID.
+                ident=var.toGrapher(cantNodosVisitados);
+            }
+            this.codigoGraph += ident;
+            String [] delimitador=ident.split("\\[");
+            String enlace=this.auxPadres.peek()+"->"+delimitador[0]+"; \n";
+            this.codigoGraph += enlace;
+            this.cantNodosVisitados++;
+        }else{
+            //no terminal.
+            //ahora se verifica si expresion corresponde a un numero o un Nodo.
+            if(var.getID()==null){
+                //la expresion corresponde a un numero.
+                //se ingresa la cadena correpondiente al nodo var de numero.
+                ident = var.toGrapherNumero(this.cantNodosVisitados);
+            }else{
+                //la espresion corresponde a un nodo.
+                ident = var.toGrapher(this.cantNodosVisitados);
+            }
+            
+            //tomo la cadena del variable vector (ya que esa gramataca dice que este nodo noes terminal).
+            //ident = var.toGrapher(this.cantNodosVisitados);
+            this.codigoGraph += ident;
+            String[] delimitador = ident.split("\\[");
+            //enlazo la cadena.
+            String enlace = this.auxPadres.peek() + "->" + delimitador[0] + "; \n";
+            this.codigoGraph += enlace;
+            this.auxPadres.push(delimitador[0]);
+            this.cantNodosVisitados++;
+            if(var.getID()!=null) ((Nodo)var.getExpression()).aceptar(this);
+//            //ahora se verifica si la expresion es un nodo o un numero.
+//            if(var.getID()==null){
+//                //la expresion corresponde a un numero.
+//                //se ingresa la cadena correpondiente al nodo var de numero.
+//                this.codigoGraph += var.toGrapherNumero(this.cantNodosVisitados);
+//            }else{
+//                //la espresion corresponde a un nodo.
+//                ((Nodo)var.getExpression()).aceptar(this);
+//            }
+//            
+//            
+//            if(var.getExpression() instanceof Integer){
+//                //la expresion corresponde a un numero.
+//                //creo la cadena del numero.
+//                this.codigoGraph += this.auxPadres.peek()+"->"+(Integer)var.getExpression()+"; \n";
+//            }else if(var.getExpression() instanceof Nodo){
+//                //la expresion corresponde a un Nodo.
+//                //visito el nodo.
+//                ((Nodo)var.getExpression()).aceptar(this);
+//            }
+            this.auxPadres.pop();
+        }
+        
+        
+    }
     
 }
