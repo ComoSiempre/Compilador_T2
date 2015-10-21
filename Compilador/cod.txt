@@ -20,22 +20,26 @@ digraph G {
 "nodo8"->"nodo9"; 
 "nodo10"[label="y:INT"]; 
 "nodo8"->"nodo10"; 
-"nodo11"[label="::="]; 
+"nodo11"[label="::=
+Value: 11"]; 
 "nodo8"->"nodo11"; 
 "nodo12"[label="Variable: x"]; 
 "nodo11"->"nodo12"; 
-"nodo13"[label="+"]; 
+"nodo13"[label="+
+Value: 11"]; 
 "nodo11"->"nodo13"; 
-"nodo14"[label="3"]; 
+"nodo14"[label="*
+Value: 6"]; 
 "nodo13"->"nodo14"; 
-"nodo15"[label="*"]; 
-"nodo13"->"nodo15"; 
-"nodo16"[label="5"]; 
+"nodo15"[label="/
+Value: 2"]; 
+"nodo14"->"nodo15"; 
+"nodo16"[label="4"]; 
 "nodo15"->"nodo16"; 
-"nodo17"[label="/"]; 
+"nodo17"[label="2"]; 
 "nodo15"->"nodo17"; 
-"nodo18"[label="5"]; 
-"nodo17"->"nodo18"; 
-"nodo19"[label="8"]; 
-"nodo17"->"nodo19"; 
+"nodo18"[label="3"]; 
+"nodo14"->"nodo18"; 
+"nodo19"[label="5"]; 
+"nodo13"->"nodo19"; 
 }

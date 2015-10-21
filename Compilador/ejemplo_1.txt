@@ -6,7 +6,8 @@ void adfg;
 int main(int a, int b[]){
 	int x;
 	int y;
-	x ::= 3+5*(5 /8);
+	x ::= (4/2)*3+5;
+
 
 
 }

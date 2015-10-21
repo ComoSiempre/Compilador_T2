@@ -339,8 +339,13 @@ expression      ::=     var:v ASSIGN:as expression:ex
                             //    //corresponde a un Nodo.
                             //    RESULT=new Expression(v,as,(Nodo)ex);
                             //}
-                            //creo el nodo expresion con los datos de operador.
-                            RESULT=new Expression(v,as,ex);
+
+                            //creo el nodo expression.
+                            Expression e = new Expression(v,as,ex);
+                            //asigno el valor.
+                            e.asignarValor();
+                            
+                            RESULT=e;
                         :}
                         |
                         simple_expression:si
@@ -378,7 +383,10 @@ simple_expression       ::=     additive_expression:a relop:ope additive_express
                                     //    RESULT=new Expression((Nodo)a,ope,(Nodo)b);
                                     //}
                                     //se crea el Nodo expresion con la nueva operacion.
-                                    RESULT=new Expression(a, ope, b);
+                                    Expression e = new Expression(a, ope, b);
+                                    //es una expresion de comparacion, por lo que se le da true al flag(importante para derivar los resultados de operaciones).
+                                    e.setEsComparacion(true);
+                                    RESULT=e;
                                 :}
                                 |
                                 additive_expression:ad
@@ -424,7 +432,11 @@ additive_expression     ::=     additive_expression:a addop:ope term:b
                                     //}else if(a instanceof Nodo && b instanceof Nodo){
                                     //    RESULT=new Expression((Nodo)a,ope,(Nodo)b);
                                     //}
-                                    RESULT=new Expression(a,ope,b);
+                                    //se crea el nodo expresion.
+                                    Expression e = new Expression(a,ope,b);
+                                    //se calcula el valor de la operacion.
+                                    e.calculoValor();
+                                    RESULT=e;
                                 :}
                                 |
                                 term:t
@@ -454,7 +466,11 @@ term        ::=     term:a mulop:ope factor:b
                         //}else if(a instanceof Nodo && b instanceof Nodo){
                         //    RESULT=new Expression((Nodo)a,ope,(Nodo)b);
                         //}
-                        RESULT=new Expression(a,ope,b);
+                        //se crea el nodo expression.
+                        Expression e = new Expression(a,ope,b);
+                        //se calcula el valor de la operacion.
+                        e.calculoValor();
+                        RESULT=e;
                     :}
                     |
                     factor:f
@@ -484,11 +500,13 @@ factor      ::=     factor:a powop:ope exp:b
                         //            }else if(a instanceof Nodo && b instanceof Nodo){
                         //                RESULT=new Expression((Nodo)a,ope,(Nodo)b);
                         //            }
-                        //si no funciona, usar el condicionante. (por probar).
+                        //si no funciona, usar el condicionante.
+
+
                         RESULT=new Expression(a,ope,b);
                     :}
                     |
-                    exp:e //puede llegar como Nodo o numero.
+                    exp:e //puede llegar como Nodo o numero (dentro de nodo Var).
                     {:
                         RESULT=e;
                     :};

@@ -27,7 +27,7 @@ public class Var extends Nodo implements visitaNodo {
         this.Expression=expression;
     }
     /**
-     * constructor 2, usado en caso de que la expresion corresponde a un numero.
+     * constructor 2, usado en caso de que la expresion corresponde a un numero (var ::= ID [ num ]).
      * @param id nombre del la variable.
      * @param numero el numero del vector.
      */
@@ -44,7 +44,7 @@ public class Var extends Nodo implements visitaNodo {
         this.Expression=null;
     }
     /**
-     * constructor 4, usado cuando se nesesita guardar un numero en un nodo. (usado solo en gramatica 14).
+     * constructor 4, usado cuando se nesesita guardar un numero en un nodo. (usado solo en gramatica 30).
      * @param numero 
      */
     public Var(int numero){
@@ -52,9 +52,7 @@ public class Var extends Nodo implements visitaNodo {
         this.Expression=null;
         this.ID=null;
     }
-    public String getID(){
-        return this.ID;
-    }
+    
     public String toGrapher(int contNodos){
         
         //condicionante usado para crar el codigo segun si la expresion corresponde a un numero o un nodo.
@@ -69,10 +67,15 @@ public class Var extends Nodo implements visitaNodo {
     public String toGrapherNumero(int contNodos){
         return "\"nodo"+contNodos+"\"[label=\""+this.numeroExpresion+"\"]; \n";
     }
+    public String getID(){
+        return this.ID;
+    }
     public Object getExpression(){
         return this.Expression;
     }
-    
+    public int getNumeroExpresion(){
+        return this.numeroExpresion;
+    }
     @Override
     public void aceptar(GrapherVisitor v) {
         v.visitar(this);
