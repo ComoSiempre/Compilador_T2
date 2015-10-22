@@ -83,8 +83,8 @@ non terminal    Nodo    factor;
 non terminal    String    powop;
 non terminal    Nodo    exp;
 non terminal    Nodo    call;
-non terminal    args;
-non terminal    arg_list;   
+non terminal    Nodo    args;
+non terminal    Nodo    arg_list;   
 non terminal    empty; //representaria en epsilon en cup.
 
 precedence left ELSE;
@@ -544,24 +544,44 @@ exp         ::=     PARENT_IZQ expression:ex PARENT_DER
                         
                     :};
 
-call    ::=     ID PARENT_IZQ args PARENT_DER
+call    ::=     ID:id PARENT_IZQ args:arg PARENT_DER
                 {:
+                    //se ingresa la id al nodo en ascenso.
+                    ((Call)arg).setID(id);
+                    RESULT=arg;
+
                 :};
 
-args    ::=     arg_list
+args    ::=     arg_list:arg
                 {:
+                    RESULT=arg;
                 :}
                 |
                 empty
                 {:
+                    //en caso de que no haya argumentos, creo el nodo desde aqui.
+                    //ya que no se derivara arg_list.
+                    RESULT=new Call();
                 :};
 
-arg_list    ::=     arg_list COMA expression
+arg_list    ::=     arg_list:list COMA expression:ex
                     {:
+                        if(ex != null){
+                            ((Call)list).agregarArgumento(ex);
+                        }else{
+                            //no deberia entrar aqui.
+                            list=new Call();
+                        }
+                        RESULT=list;
+
                     :}
                     |
-                    expression
+                    expression:ex
                     {:
+                        //primer argumento, creo el nodo e ingreso la expresion a la lista.
+                        Call lista = new Call();
+                        lista.agregarArgumento(ex);
+                        RESULT=lista;
                     :};
 
 /* Gramatica nesesaria */

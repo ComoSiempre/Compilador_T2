@@ -257,5 +257,29 @@ public class GrapherVisitor implements visitor {
         
         
     }
+
+    @Override
+    public void visitar(Call call) {
+        //obtengo el codigo graph del nodo call.
+        String ident = call.toGrapher(this.cantNodosVisitados);
+        //uno al codigo general.
+        this.codigoGraph += ident;
+        String [] delimitador=ident.split("\\[");
+        //enlazo el nodo con el padre.
+        String enlace =this.auxPadres.peek()+"->"+delimitador[0]+"; \n";
+        //guardo el enlace en el codigo general.
+        this.codigoGraph += enlace;
+        //guardo el nuevo nodo en la pila 
+        this.auxPadres.push(delimitador[0]);
+        //cuento como nodo visitado.
+        this.cantNodosVisitados++;
+        //visito los argumentos.
+        for(Nodo argumento : call.getArgs()){
+            argumento.aceptar(this);
+        }
+        //ya visto el subarbol de call, elimino la raiz .
+        this.auxPadres.pop();
+        
+    }
     
 }

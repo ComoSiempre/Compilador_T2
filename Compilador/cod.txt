@@ -42,4 +42,10 @@ Value: 2"];
 "nodo14"->"nodo18"; 
 "nodo19"[label="5"]; 
 "nodo13"->"nodo19"; 
+"nodo20"[label="Call : funcion"]; 
+"nodo8"->"nodo20"; 
+"nodo21"[label="Variable: x"]; 
+"nodo20"->"nodo21"; 
+"nodo22"[label="Variable: y"]; 
+"nodo20"->"nodo22"; 
 }

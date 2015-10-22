@@ -19,4 +19,5 @@ public interface visitor {
     public void visitar(Compound componente);
     public void visitar(Expression expresion);
     public void visitar(Var var);
+    public void visitar(Call call);
 }

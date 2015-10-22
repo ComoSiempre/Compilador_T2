@@ -7,7 +7,7 @@ int main(int a, int b[]){
 	int x;
 	int y;
 	x ::= (4/2)*3+5;
-
+	funcion(x,y);
 
 
 }
