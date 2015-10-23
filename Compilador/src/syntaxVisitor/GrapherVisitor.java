@@ -33,7 +33,7 @@ public class GrapherVisitor implements visitor {
      */
     public void generarGraph() {
         try{
-            BufferedWriter writer = new BufferedWriter(new FileWriter("cod.txt"));
+            BufferedWriter writer = new BufferedWriter(new FileWriter("cod.dot"));
             //System.out.println(this.codigoGraph);
             writer.write("digraph G { \n");
             writer.write(this.codigoGraph);
@@ -41,7 +41,7 @@ public class GrapherVisitor implements visitor {
             writer.write("}");
             writer.close();
             String dotPath="C:\\graphviz-2.38\\release\\bin\\dot.exe";//path del instalable del graphviz.
-            String fileInputPath=pathBase+"/cod.txt"; //txt del codigo .dot del arbol
+            String fileInputPath=pathBase+"/cod.dot"; //txt del codigo .dot del arbol
             String fileOutputPath = pathBase +"/testCod.png"; //salida de la imagen del codigo.
             String tParam = "-Tpng";
             String tOParam = "-o";
