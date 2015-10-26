@@ -20,4 +20,5 @@ public interface visitor {
     public void visitar(Expression expresion);
     public void visitar(Var var);
     public void visitar(Call call);
+    public void visitar(Statement stmt);
 }

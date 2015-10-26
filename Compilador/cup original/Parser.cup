@@ -1,0 +1,637 @@
+package parser;
+
+import java_cup.runtime.*;
+import java.util.ArrayList;
+import scanner.*;
+import ast.*;
+import Tables.*;
+
+/* Codigo del parser, se copia integramente a la clase final.
+    Agregamos el manejo de errores. */
+parser code {:
+    //public void syntax_error(Symbol s){
+    //    System.err.println("Error Sintaxis en linea:"+(s.left+1)+" columna "+(s.right+1)+", " +(String)s.value);
+    //}
+
+	public void report_error(String message, Object info) {
+    	    StringBuilder m = new StringBuilder("Error Sintactico");
+        	if (info instanceof java_cup.runtime.Symbol) {
+            	java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {                
+                m.append(" en linea "+(s.left+1));
+                if (s.right >= 0)
+                    m.append(", columna "+(s.right+1));
+            }
+        }
+        m.append(" : "+message);
+        System.err.println(m);
+    }
+   
+    /* Cuando se encuentra un error de donde el sistema no puede
+        recuperarse, se lanza un error fatal. Se despliega el mensaje
+        de error y se finaliza la ejecucion. */
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        //System.exit(1);
+    }
+:};
+
+/* ------------Declaracion de simbolos terminales y no terminales---------- */
+   
+/* Terminales (tokens obtenidos por el analizador lexico).  
+
+   Terminales que no tienen un valor son listados primero, los terminales que
+   tienen un valor como los enteros son listados en la segunda o demas lineas. */
+terminal String 	IF,INT,ELSE,RETURN,VOID,WHILE,FOR,SUMA,RESTA,MULTIPLICACION,
+					DIVISION,EXPONENCIACION_1,EXPONENCIACION_2,ASSIGN,PARENT_IZQ,
+					PARENT_DER,CORCH_IZQ,CORCH_DER,LLAVE_IZQ,LLAVE_DER,MENOR,MENIGUAL,
+					MAYOR,MAYIGUAL,IGUALIGUAL,DISTINTO,PUNTOCOMA,COMA;
+terminal String 	NUM; //se trabajara como string y se convertira a interger cuando sea nesesario.
+terminal String 	ID;	
+
+
+/* No terminales usados en la seccion gramatical. 
+
+   es esta seccion se listara los objetos Nodo que contendran la gramatica
+   y los que tengan un valor Object. Un Object se refiere a que
+   no tienen tipo, pudiendo ser entero o String.
+*/
+non terminal    Program    program;
+non terminal    Program    declaration_list;
+non terminal    Nodo    declaration;
+non terminal    Nodo    var_declaration;
+non terminal    Nodo    fun_declaration;
+non terminal    String    type_specifier;
+non terminal    Nodo    params;
+non terminal    Nodo    param_list;
+non terminal    Nodo    param;
+non terminal    Nodo    compound_stmt;
+non terminal    ArrayList<Nodo>    local_declarations;
+non terminal    ArrayList<Nodo>    statement_list;
+non terminal    Nodo    statement;
+non terminal    Nodo    expression_stmt;
+non terminal    Nodo    selection_stmt;
+non terminal    Nodo    iteration_stmt;
+non terminal    Nodo    return_stmt;
+non terminal    Nodo    expression;
+non terminal    Nodo    while_stmt;
+non terminal    Nodo    for_stmt;
+non terminal    Nodo    var;
+non terminal    Nodo    simple_expression;
+non terminal    Nodo    additive_expression;
+non terminal    String    relop;
+non terminal    String    addop;
+non terminal    Nodo    term;
+non terminal    String    mulop;
+non terminal    Nodo    factor;
+non terminal    String    powop;
+non terminal    Nodo    exp;
+non terminal    Nodo    call;
+non terminal    Nodo    args;
+non terminal    Nodo    arg_list;   
+non terminal    empty; //representaria en epsilon en cup.
+
+precedence left ELSE;
+start with program;
+
+/* ------------------- Seccion de la gramatica ------------------------ */
+
+program     ::=     declaration_list:dl
+                    {:
+                        System.out.println("Fin analisis sintactico.");
+                        RESULT=dl; //envio la raiz para ser dibujado en grapher
+                    :};
+
+declaration_list    ::=     declaration_list:list declaration:d
+                            {:
+                                System.out.println("estoi en dec_list -> dec_list dec : creo nodo Program.");
+                                if(d != null){
+                                    list.agregarDeclaracion(d);
+                                }else{
+                                    //no deberia llegar nunca aqui.
+                                    list = new Program();
+                                }
+                                RESULT=list;
+                            :}
+                            |
+                            declaration:d
+                            {:
+                                System.out.println("estoi en dec_list -> dec : creo nodo program para guardar la declaracion.");
+                                Program lista = new Program();
+                                lista.agregarDeclaracion(d);
+                                RESULT=lista;
+                            :};
+
+declaration     ::=     var_declaration:v
+                        {:
+                            System.out.println("estoi en dec -> var_dec : sigo subiendo.");
+                            RESULT=v;
+                        :}
+                        |
+                        fun_declaration:f
+                        {:
+                            System.out.println("estoi en dec -> fun_dec : sigo subiendo.");
+                            RESULT=f;
+                        :}
+                        ;
+
+var_declaration     ::=     type_specifier:te ID:id PUNTOCOMA
+                            {:
+                                System.out.println("estoi en var_dec -> type id ; : creo nodo VarDec.");
+                                if(te.equalsIgnoreCase("int")){
+                                    RESULT= new VarDec("INT",id, false);
+                                }else{
+                                    RESULT=new VarDec("VOID",id, false);
+                                }
+                            :}
+                            |
+                            type_specifier:te ID:id CORCH_IZQ NUM:num CORCH_DER PUNTOCOMA
+                            {:
+                                System.out.println("estoi en var_dec -> type id [num]; : creo nodo VarDec.");
+                                if(te.equalsIgnoreCase("int")){
+                                    RESULT= new VarDec("INT", id, true, Integer.parseInt(num));
+                                }else{
+                                    RESULT=new VarDec("VOID", id, true, Integer.parseInt(num));
+                                }
+                            :};
+
+type_specifier      ::=     INT:i
+                            {:
+
+                                RESULT=i;
+                            :}
+                            |
+                            VOID:v
+                            {:
+                                RESULT=v;
+                            :};
+
+fun_declaration     ::=     type_specifier:t ID:id PARENT_IZQ params:pa PARENT_DER compound_stmt:com
+                            {:
+                                System.out.println("estoi en fun_dec -> type id (params) compound_stmt : creo nodo FunDec.");
+                                //ingreso la id al nodo anteriormente creado.
+                                ((FunDec) pa).setID(id);
+                                //ingreso el tipo de funcion al nodo anteriormente creado.
+                                ((FunDec) pa).setTipoFunction(t);
+
+                                //condicionante usado si los componentes existen o no.
+                                if(com != null){
+                                    ((FunDec) pa).setCompound_stmt(com);
+                                }
+                                RESULT=(Nodo) pa;
+
+                            :}
+                            | error:e                                               {: parser.report_error("Syntax error, skip rest",e);:}
+                            ;
+
+params      ::=     param_list:lista
+                    {:
+                        System.out.println("estoi en params -> params_list : sigo subiendo.");
+                        RESULT=lista;
+                    :}
+                    |
+                    VOID
+                    {:
+                        System.out.println("estoi en params -> void : sigo subiendo.");
+                        //se crea el nodo directamente sin parametros.
+                        RESULT=new FunDec(true);
+                    :};
+
+param_list  ::=     param_list:list COMA param:p
+                    {:
+                        //condicionante si el parametro no es nulo. en ese caso se agrega a la lista de paramentros del nodo Funcion.
+                        if(p != null){
+                            ((FunDec)list).agregarParametro(p);
+                        }else{
+                            //nunca entra aqui.
+                            list=new FunDec();
+                        }
+                        RESULT=list;
+                    :}
+                    |
+                    param:p
+                    {:
+                        //creo el nodo de la funcion quen contendra la lista de parametros.
+                        FunDec list= new FunDec();
+                        //agrego el parametro a la lista del nodo.
+                        list.agregarParametro(p);
+                        RESULT=list;
+                    :};
+
+param   ::=     type_specifier:t ID:id
+                {:
+                    //se crea el nodo parametro.
+                    RESULT=new Param(t,id,false);
+                :}
+                |
+                type_specifier:t ID:id CORCH_IZQ CORCH_DER
+                {:
+                    //se crea el nodo parametro (parametro vector).
+                    RESULT=new Param(t, id, true);
+                :};
+
+compound_stmt   ::=     LLAVE_IZQ local_declarations:list_dec statement_list:list_sta LLAVE_DER
+                        {:
+                            System.out.println("estoi en compound_stmt->dec_list stmt_list : creo nodo compound.");
+                            RESULT= new Compound(list_dec,list_sta);
+                        :}
+                        ;
+
+local_declarations      ::=     local_declarations:list var_declaration:var
+                                {:
+                                    System.out.println("estoi en local_declarations-> local_declarations declaration : lisa ya creada, agrego la declaracion.");
+                                    //condicionante usado si el nodo variable es nulo.
+                                    if(var != null){
+                                        list.add(var);
+                                    }else{
+                                        //no entra aqui.
+                                        System.out.println("entro en un lugar prohibido");
+                                        list=new ArrayList<Nodo>();
+                                    }
+                                    RESULT=list;
+                                :}
+                                |
+                                empty
+                                {:
+                                    System.out.println("estoi en local_declarations-> empty : creo la lista.");
+                                    //se crea la lista de nodos de variables locales.
+                                    ArrayList<Nodo> list = new ArrayList<Nodo>();
+                                    RESULT=list;//se envia la lista creada.
+                                :}; 
+
+statement_list      ::=     statement_list:list statement:sta
+                            {:
+                                System.out.println("estoi en sta_list->sta_list statement : ya esta la lista creada, agrego a la listo el nodo.");
+                                //condicionante usado si el nodo Statement es nulo.
+                                if(sta != null){
+                                    list.add(sta);
+                                }else{
+                                    //no deberia entrar aqui.
+                                    list= new ArrayList<Nodo>();
+                                }
+                                RESULT=list;
+                            :}
+                            |
+                            empty
+                            {:
+                                System.out.println("estoi en sta_list->empty : creo la lista de declaraciones del compounnd y la subo.");
+                                //se crea la lista de nodos de statements.
+                                ArrayList<Nodo> list = new ArrayList<Nodo>();
+                                RESULT=list;//se envia la lista creada.
+                            :};
+
+statement       ::=     expression_stmt:ex
+                        {:
+                            //corresponde a un numero. lo que seria muy extraño, ¿la gramatica aceptaria '1;' sin asignacion a variable?
+                            //if(ex instanceof String){
+                            //    RESULT=new Var(Integer.parseInt((String)ex));
+                            //}else{
+                            //    RESULT=(Nodo)ex; //en teoria esta mal, pero se parsea ya que es feo que llege al 'num;'.    
+                            //}
+                            System.out.println("estoi en expression->expression_stmt : sigo subiendo.");
+                            RESULT=ex;
+                        :}
+                        |
+                        compound_stmt:com
+                        {:
+                            System.out.println("estoi en expression->compound_stmt : sigo subiendo.");
+                            RESULT=com;
+                        :}
+                        |
+                        selection_stmt:sel
+                        {:
+                            System.out.println("estoi en expression->selection_stmt : sigo subiendo.");
+                            RESULT=sel;
+                        :}
+                        |
+                        iteration_stmt:ite
+                        {:
+                            System.out.println("estoi en expression->iteration_stmt : sigo subiendo.");
+                            RESULT=ite;
+                        :}
+                        return_stmt:ret
+                        {:
+                            System.out.println("estoi en expression->return_stmt : sigo subiendo.");
+                            RESULT=ret;
+                        :};
+
+expression_stmt     ::=     expression:e PUNTOCOMA
+                            {:
+                                System.out.println("estoi en expression_stmt->expression; : sigo subiendo.");
+                                RESULT=e;
+                            :}
+                            |
+                            PUNTOCOMA
+                            {:
+                            :};
+
+selection_stmt      ::=     IF PARENT_IZQ expression:exp PARENT_DER statement:sta 
+                            {:
+                                RESULT= new Statement("if", exp, sta);
+                            :}
+                            |
+                            IF PARENT_IZQ expression:exp PARENT_DER statement:sta1 ELSE statement:sta2
+                            {:
+                                RESULT=new Statement("if-else",exp, sta1, sta2);
+                            :};
+
+iteration_stmt      ::=     while_stmt:w
+                            {:
+                                RESULT=w;
+                            :}
+                            |
+                            for_stmt:f
+                            {:
+                                RESULT=f;
+                            :};
+
+while_stmt      ::=     WHILE PARENT_IZQ expression:exp PARENT_DER statement:sta
+                        {:
+                            RESULT=new Statement("while",exp,sta);
+                        :};
+
+for_stmt        ::=     FOR PARENT_IZQ expression:exp1 COMA expression:exp2 COMA expression:exp3 PARENT_DER statement:sta
+                        {:
+                            RESULT=new Statement("for",exp1,exp2,exp3,sta);
+                        :};
+
+return_stmt     ::=     RETURN PUNTOCOMA
+                        {:
+                            System.out.println("estoi en return_stmt -> return ; : creo nodo Statement.");
+                            RESULT=new Statement("return");
+                        :}
+                        |
+                        RETURN expression:exp PUNTOCOMA
+                        {:
+                            System.out.println("estoi en return_stmt -> return expresion ; : creo nodo Statement.");
+                            RESULT=new Statement("return",exp);
+                        :};
+
+expression      ::=     var:v ASSIGN:as expression:ex
+                        {:
+                            //desde aqui las derivaciones por la derecha pueden ser nodos (Call, Var o Expression) 
+                            //o NUM (como String, pero guardado en el nodo como Integer).
+                            //por lo que es nesesario diferenciar el guardado en el nodo.
+                            //if(ex instanceof String){
+                            //    //expression correpsonde a un numero.
+                            //    RESULT=new Expression(v,as,Integer.parseInt((String)ex));
+                            //}else{
+                            //    //corresponde a un Nodo.
+                            //    RESULT=new Expression(v,as,(Nodo)ex);
+                            //}
+                            System.out.println("estoi en expresion -> var ::= expresion : creo nodo expresion.");
+                            //creo el nodo expression.
+                            Expression e = new Expression(v,as,ex);
+                            //asigno el valor a la expresion.
+                            e.asignarValor();
+                            
+                                                        
+                            RESULT=e;
+                        :}
+                        |
+                        simple_expression:si
+                        {:
+                            RESULT=si;
+                        :};
+
+var         ::=     ID:id
+                    {:
+                        System.out.println("estoi en Var -> id : creo nodo var.");
+                        //se crea el nodo Var.
+                        RESULT= new Var(id);
+                    :}
+                    |
+                    ID:id CORCH_IZQ expression:ex CORCH_DER
+                    {:
+                        //se crea el Nodo Var con un id y un Nodo expresion que puede ser un Nodo o un Numero.
+                        //if(ex instanceof Nodo){
+                        //    RESULT= new Var(id,(Nodo)ex);    
+                        //}else{
+                        //    RESULT= new Var(id,Integer.parseInt((String)ex));
+                        //}
+                        System.out.println("estoi en Var -> id [exp]: creo nodo var.");
+                        RESULT= new Var(id,ex);
+                    :};
+
+simple_expression       ::=     additive_expression:a relop:ope additive_expression:b
+                                {:
+                                    //se condicionan todas las opciones posibles de derivaciones.
+                                    //if(a instanceof String && b instanceof String){
+                                    //    RESULT=new Expression(Integer.parseInt((String)a),ope,Integer.parseInt((String)b));
+                                    //}else if(a instanceof String && b instanceof Nodo){
+                                    //    RESULT=new Expression(Integer.parseInt((String)a),ope,(Nodo)b);
+                                    //}else if(a instanceof Nodo && b instanceof String){
+                                    //    RESULT=new Expression((Nodo)a,ope,Integer.parseInt((String)b));
+                                    //}else if(a instanceof Nodo && b instanceof Nodo){
+                                    //    RESULT=new Expression((Nodo)a,ope,(Nodo)b);
+                                    //}
+                                    System.out.println("estoi en ad_exp->ad_exp relop ad_exp : creo nodo expression.");
+                                    //se crea el Nodo expresion con la nueva operacion.
+                                    Expression e = new Expression(a, ope.toString(), b);
+                                    //es una expresion de comparacion, por lo que se le da true al flag(importante para derivar los resultados de operaciones).
+                                    e.setEsComparacion(true);
+                                    RESULT=e;
+                                :}
+                                |
+                                additive_expression:ad
+                                {:
+                                    System.out.println("estoi en ad_exp -> ad_exp : sigo subiendo.");
+                                    RESULT=ad;
+                                :};
+
+relop       ::=     MENIGUAL:me
+                    {:
+                        RESULT=me;
+                    :}
+                    MENOR:men
+                    {:
+                        RESULT=men;
+                    :}
+                    MAYOR:ma
+                    {:
+                        RESULT=ma;
+                    :}
+                    MAYIGUAL:may
+                    {:
+                        RESULT=may;
+                    :}
+                    IGUALIGUAL:ii
+                    {:
+                        RESULT=ii;
+                    :}
+                    DISTINTO:dis
+                    {:
+                        RESULT=dis;
+                    :};
+
+additive_expression     ::=     additive_expression:a addop:ope term:b
+                                {:
+
+                                    //otra nueva operacion. se crea otro nodo.
+                                    //if(a instanceof String && b instanceof String){
+                                    //    RESULT=new Expression(Integer.parseInt((String)a),ope,Integer.parseInt((String)b));
+                                    //}else if(a instanceof String && b instanceof Nodo){
+                                    //    RESULT=new Expression(Integer.parseInt((String)a),ope,(Nodo)b);
+                                    //}else if(a instanceof Nodo && b instanceof String){
+                                    //    RESULT=new Expression((Nodo)a,ope,Integer.parseInt((String)b));
+                                    //}else if(a instanceof Nodo && b instanceof Nodo){
+                                    //    RESULT=new Expression((Nodo)a,ope,(Nodo)b);
+                                    //}
+                                    System.out.println("estoi en ad_exp -> ad_exp add term : creo nodo expression.");
+                                    //se crea el nodo expresion.
+                                    Expression e = new Expression(a,ope,b);
+                                    //se calcula el valor de la operacion.
+                                    e.calculoValor();
+                                    RESULT=e;
+                                :}
+                                |
+                                term:t
+                                {:
+                                    System.out.println("estoi en ad_exp -> term : sigo subiendo.");
+                                    RESULT=t;
+                                :};
+
+addop       ::=     SUMA:sum
+                    {:
+                        RESULT=sum;
+                    :}
+                    |
+                    RESTA:res
+                    {:
+                        RESULT=res;
+                    :};
+
+term        ::=     term:a mulop:ope factor:b
+                    {:
+                        //nueva operacion, creacion de nuevo nodo Expression.
+                        //if(a instanceof String && b instanceof String){
+                        //    RESULT=new Expression(Integer.parseInt((String)a),ope,Integer.parseInt((String)b));
+                        //}else if(a instanceof String && b instanceof Nodo){
+                        //    RESULT=new Expression(Integer.parseInt((String)a),ope,(Nodo)b);
+                        //}else if(a instanceof Nodo && b instanceof String){
+                        //    RESULT=new Expression((Nodo)a,ope,Integer.parseInt((String)b));
+                        //}else if(a instanceof Nodo && b instanceof Nodo){
+                        //    RESULT=new Expression((Nodo)a,ope,(Nodo)b);
+                        //}
+                        System.out.println("estoi en term -> term mulop factor : creo nodo expresion.");
+                        //se crea el nodo expression.
+                        Expression e = new Expression(a,ope,b);
+                        //se calcula el valor de la operacion.
+                        e.calculoValor();
+                        RESULT=e;
+                    :}
+                    |
+                    factor:f
+                    {:
+                        RESULT=f;
+                    :};
+
+mulop       ::=     MULTIPLICACION:mu
+                    {:
+                        RESULT=mu;
+                    :}
+                    |
+                    DIVISION:div
+                    {:
+                        RESULT=div;
+                    :};
+
+factor      ::=     factor:a powop:ope exp:b
+                    {:
+                        //nueva operacion, se crea nuevo nodo Expression.
+                        //if(a instanceof String && b instanceof String){
+                        //                RESULT=new Expression(Integer.parseInt((String)a),ope,Integer.parseInt((String)b));
+                        //            }else if(a instanceof String && b instanceof Nodo){
+                        //                RESULT=new Expression(Integer.parseInt((String)a),ope,(Nodo)b);
+                        //            }else if(a instanceof Nodo && b instanceof String){
+                        //                RESULT=new Expression((Nodo)a,ope,Integer.parseInt((String)b));
+                        //            }else if(a instanceof Nodo && b instanceof Nodo){
+                        //                RESULT=new Expression((Nodo)a,ope,(Nodo)b);
+                        //            }
+                        //si no funciona, usar el condicionante.
+                        System.out.println("estoi en factor -> factor pow exp : creo nodo expression.");
+
+                        RESULT=new Expression(a,ope,b);
+                    :}
+                    |
+                    exp:e //puede llegar como Nodo o numero (dentro de nodo Var).
+                    {:
+                        System.out.println("estoi en factor -> exp : sigo subiendo.");
+                        RESULT=e;
+                    :};
+
+powop       ::=     EXPONENCIACION_1:exp1 //^
+                    {:
+                        RESULT=exp1;
+                    :}
+                    |
+                    EXPONENCIACION_2:exp2 //**
+                    {:
+                        RESULT=exp2;
+                    :};                                                                                                                                                                                                                                                                                        
+
+exp         ::=     PARENT_IZQ expression:ex PARENT_DER
+                    {:
+                        RESULT=ex;
+                    :}
+                    |
+                    var:v
+                    {:
+                        RESULT=v;
+                    :}
+                    |
+                    call:c
+                    {:
+                        RESULT=c;
+                    :}
+                    |
+                    NUM:num
+                    {:
+                        //creo el nodo var que guardara el numero.
+                        RESULT=new Var(Integer.parseInt(num));
+
+                        
+                    :};
+
+call    ::=     ID:id PARENT_IZQ args:arg PARENT_DER
+                {:
+                    //se ingresa la id al nodo en ascenso.
+                    ((Call)arg).setID(id);
+                    RESULT=arg;
+
+                :};
+
+args    ::=     arg_list:arg
+                {:
+                    RESULT=arg;
+                :}
+                |
+                empty
+                {:
+                    //en caso de que no haya argumentos, creo el nodo desde aqui.
+                    //ya que no se derivara arg_list.
+                    RESULT=new Call();
+                :};
+
+arg_list    ::=     arg_list:list COMA expression:ex
+                    {:
+                        if(ex != null){
+                            ((Call)list).agregarArgumento(ex);
+                        }else{
+                            //no deberia entrar aqui.
+                            list=new Call();
+                        }
+                        RESULT=list;
+
+                    :}
+                    |
+                    expression:ex
+                    {:
+                        //primer argumento, creo el nodo e ingreso la expresion a la lista.
+                        Call lista = new Call();
+                        lista.agregarArgumento(ex);
+                        RESULT=lista;
+                    :};
+
+/* Gramatica nesesaria */
+empty   ::= /* vacio */;                                                   

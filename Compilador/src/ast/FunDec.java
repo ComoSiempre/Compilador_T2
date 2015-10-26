@@ -9,8 +9,8 @@ import java.util.ArrayList;
 import syntaxVisitor.GrapherVisitor;
 
 /**
- *
- * @author jona
+ * clase usada para la crecion de nodo funcion. 
+ * @author Jonathan Vasquez - Eduardo Tapia.
  */
 public class FunDec extends Nodo implements visitaNodo {
 

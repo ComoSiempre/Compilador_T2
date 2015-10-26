@@ -7,8 +7,8 @@ package ast;
 
 import syntaxVisitor.GrapherVisitor;
 /**
- *
- * @author jona
+ * Interface usada para la implementacion del patron visitor para los nodos creados en el paquete ast.
+ * @author Jonathan Vasquez - eduardo Tapia.
  */
 public interface visitaNodo {
     public void aceptar(GrapherVisitor v);//cambiar visitor por clase Grapherviz

@@ -190,9 +190,12 @@ public class Expression extends Nodo implements visitaNodo {
         }
     }
     public String toGrapher(int contNodos){
+        //genero codigo segun el tipo de expresion.
+        //en caso de que el nodo sea una expresion de calculo (+,-,*,/,**,^)
         if(this.esComparacion==false){
             return "\"nodo"+contNodos+"\"[label=\""+this.operador+"\nValue: "+this.valor+"\"]; \n";
         }else{
+            //caso contrario, corresponderia a un nodo de comparacion (LEQ, LT, GT, GEQ, EQ, NEQ).
             return "\"nodo"+contNodos+"\"[label=\""+this.operador+"\"]; \n";
         }
         
@@ -201,8 +204,18 @@ public class Expression extends Nodo implements visitaNodo {
      * metodo usado en caso de que sea una operacion de asignacion, expression -> var ASSIGN expresion (gramatica 20).
      */
     public void asignarValor(){
-        this.valor=((Expression)this.operacion2).getValor();
+        //verifico si la expresion es un Var numero  o un nodo expresion diferente.
+        if(this.operacion2 instanceof Expression){
+            //quiere decir que la expresion viene de alguna gramatica de operacion d comparacacion o de calculo.
+            this.valor =((Expression)this.operacion2).getValor();
+        }else{
+            //en caso contrario, el nodo corresponde a un nodo Var, por lo que el valor guardado esta en la variable de numero de var.
+            this.valor =((Var)this.operacion2).getNumeroExpresion();
+        }
+        
     }
+    
+    
     public Nodo getOperador1(){
         return this.operacion1;
     }

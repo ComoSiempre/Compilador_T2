@@ -6,6 +6,7 @@ import Tables.*;
 
 %%
 %class Lexer
+%ignorecase
 %public
 %unicode
 %line
@@ -21,12 +22,12 @@ LETRA = [a-zA-Z]
 DIGITO = [0-9]
 NUMERO = {DIGITO} | [1-9]{DIGITO}*
 ELSE = ([eE])([lL])([sS])([eE])
-IF = ([Ii])([Ff])
-INT = ([Ii])([Nn])([Tt])
+IF = ([iI])([fF])
+INT = ([iI])([nN])([tT])
 VOID = ([vV])([oO])([iI])([dD])
 RETURN = ([rR])([eE])([tT])([uU])([rR])([nN])
 WHILE = ([wW])([hH])([iI])([lL])([eE])
-FOR = ([Ff])([Oo])([Rr]) 
+FOR = ([fF])([oO])([rR]) 
 
 SALTO=\n|\r|\r\n /*saltos de linea, que no nos interesa*/
 InputCharacter = [^\r\n] /*cualquier cosa excepto /r/n*/
@@ -52,8 +53,8 @@ ESPACIOS     = {SALTO} | [ \t\f] /*tabulaciones o saltos de linea (whitespace)*/
 "-" {return new Symbol(sym.RESTA,yyline,yycolumn,yytext());}
 "*" {return new Symbol(sym.MULTIPLICACION,yyline,yycolumn,yytext());}
 "/" {return new Symbol(sym.DIVISION,yyline,yycolumn,yytext());}
-"^" {return new Symbol(sym.EXPONENCIACION_1,yyline,yycolumn,yytext());}
-"**" {return new Symbol(sym.EXPONENCIACION_2,yyline,yycolumn,yytext());}
+"^" {return new Symbol(sym.EXPO_1,yyline,yycolumn,yytext());}
+"**" {return new Symbol(sym.EXPO_2,yyline,yycolumn,yytext());}
 "::=" {return new Symbol(sym.ASSIGN,yyline,yycolumn,yytext());}
 "(" {return new Symbol(sym.PARENT_IZQ,yyline,yycolumn,yytext());}
 ")" {return new Symbol(sym.PARENT_DER,yyline,yycolumn,yytext());}
@@ -72,5 +73,8 @@ ESPACIOS     = {SALTO} | [ \t\f] /*tabulaciones o saltos de linea (whitespace)*/
 
 ([a-z]){LETRA}*_?{LETRA}*{DIGITO}* {return new Symbol(sym.ID,yyline,yycolumn,yytext());}
 {NUMERO} {return new Symbol(sym.NUM,yyline,yycolumn,yytext());}
-. {System.out.println("Error Lexico: linea "+(yyline)+" columna "+(yycolumn)+ " token: "+yytext());}
+
+. 	{
+		System.err.println("Error Lexico: linea "+(yyline)+" columna "+(yycolumn)+ " token: "+yytext());
+	}
 

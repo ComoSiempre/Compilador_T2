@@ -1,36 +1,54 @@
 package parser;
 
 import java_cup.runtime.*;
+
+import java_cup.parser;
+import java.io.*;
 import java.util.ArrayList;
+
 import scanner.*;
 import ast.*;
-import Tables.*;
 
 /* Codigo del parser, se copia integramente a la clase final.
     Agregamos el manejo de errores. */
-parser code {:
-	public void report_error(String message, Object info) {
-    	    StringBuilder m = new StringBuilder("Error");
-        	if (info instanceof java_cup.runtime.Symbol) {
-            	java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+parser code{:
+
+    public String cadena = " "; /* contiene la cadena de producciones */
+
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+    public void report_error(String message, Object info) {
+        StringBuilder m = new StringBuilder("Error Sintactico");
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
             if (s.left >= 0) {                
                 m.append(" en linea "+(s.left+1));
                 if (s.right >= 0)
                     m.append(", columna "+(s.right+1));
             }
         }
-        m.append(" : "+message);
-        //System.err.println(m);
+        m.append(" : "+message + " -> Parser");
+        System.err.println(m);
     }
-   
-    /* Cuando se encuentra un error de donde el sistema no puede
-        recuperarse, se lanza un error fatal. Se despliega el mensaje
-        de error y se finaliza la ejecucion. */
-    public void report_fatal_error(String message, Object info) {
-        report_error(message, info);
-        //System.exit(1);
+
+    public void syntax_error(Symbol s){
+        System.out.println("compiler has detected a syntax error at line " + s.left + " column " + s.right); 
+    }
+
+    public static void main(String [] args){
+        try{
+            Parser p = new Parser(new Lexer( new FileReader(args[0])));
+            Object result = p.parse().value;
+        }
+        catch(Exception e){
+        }
     }
 :};
+
+
+
 
 /* ------------Declaracion de simbolos terminales y no terminales---------- */
    
@@ -38,12 +56,15 @@ parser code {:
 
    Terminales que no tienen un valor son listados primero, los terminales que
    tienen un valor como los enteros son listados en la segunda o demas lineas. */
-terminal String 	IF,INT,ELSE,RETURN,VOID,WHILE,FOR,SUMA,RESTA,MULTIPLICACION,
-					DIVISION,EXPONENCIACION_1,EXPONENCIACION_2,ASSIGN,PARENT_IZQ,
-					PARENT_DER,CORCH_IZQ,CORCH_DER,LLAVE_IZQ,LLAVE_DER,MENOR,MENIGUAL,
-					MAYOR,MAYIGUAL,IGUALIGUAL,DISTINTO,PUNTOCOMA,COMA;
-terminal String 	NUM; //se trabajara como string y se convertira a interger cuando sea nesesario.
-terminal String 	ID;	
+
+terminal        String      ASSIGN, EXPO_1, EXPO_2, SUMA, MULTIPLICACION, RESTA, DIVISION;
+terminal        String      IGUALIGUAL, MENOR, MENIGUAL, MAYOR, MAYIGUAL, DISTINTO;
+terminal        String      LLAVE_IZQ, LLAVE_DER, CORCH_IZQ, CORCH_DER, PARENT_IZQ, PARENT_DER;
+terminal        String      PUNTOCOMA, COMA;
+terminal        String      IF, ELSE, INT, RETURN, WHILE, FOR, VOID;
+terminal        String      ID;
+terminal        String      NUM;
+
 
 
 /* No terminales usados en la seccion gramatical. 
@@ -52,537 +73,492 @@ terminal String 	ID;
    y los que tengan un valor Object. Un Object se refiere a que
    no tienen tipo, pudiendo ser entero o String.
 */
-non terminal    Program    program;
-non terminal    Program    declaration_list;
-non terminal    Nodo    declaration;
-non terminal    Nodo    var_declaration;
-non terminal    Nodo    fun_declaration;
-non terminal    String    type_specifier;
-non terminal    Nodo    params;
-non terminal    Nodo    param_list;
-non terminal    Nodo    param;
-non terminal    Nodo    compound_stmt;
-non terminal    ArrayList<Nodo>    local_declarations;
-non terminal    ArrayList<Nodo>    statement_list;
-non terminal    Nodo    statement;
-non terminal    Nodo    expression_stmt;
-non terminal    Nodo    selection_stmt;
-non terminal    Nodo    iteration_stmt;
-non terminal    Nodo    return_stmt;
-non terminal    Nodo    expression;
-non terminal    while_stmt;
-non terminal    for_stmt;
-non terminal    Nodo    var;
-non terminal    Nodo    simple_expression;
-non terminal    Nodo    additive_expression;
-non terminal    String    relop;
-non terminal    String    addop;
-non terminal    Nodo    term;
-non terminal    String    mulop;
-non terminal    Nodo    factor;
-non terminal    String    powop;
-non terminal    Nodo    exp;
-non terminal    Nodo    call;
-non terminal    Nodo    args;
-non terminal    Nodo    arg_list;   
-non terminal    empty; //representaria en epsilon en cup.
+non terminal        Program                program, declaration_list;  
+non terminal        String                 type_specifier;
+non terminal        Nodo      var_declaration, declaration;
+non terminal        Nodo      fun_declaration;  
+non terminal        Nodo           param_list;
+non terminal        Nodo              params;
+non terminal        Nodo                param;
+non terminal        Nodo       selection_stmt;
+non terminal        Nodo                iteration_stmt, while_stmt, return_stmt;
+non terminal        Nodo             for_stmt;
+non terminal        ArrayList<Nodo>                local_declarations, statement_list;
+non terminal        Nodo            statement, compound_stmt;   
+non terminal        String                 relop, addop, mulop, powop;
+non terminal        Nodo                var, expression, exp, expression_stmt;
+non terminal        Nodo                term, additive_expression, simple_expression;
+non terminal        Nodo                factor, call, args, arg_list;
+   
+
+
+/* ------------------- Seccion de Precedencia ------------------------ */
 
 precedence left ELSE;
-start with program;
+precedence left SUMA, RESTA;
+precedence left MULTIPLICACION, DIVISION;
+precedence left EXPO_1, EXPO_2;
+
+
+
 
 /* ------------------- Seccion de la gramatica ------------------------ */
+ 
+start with program;
 
-program     ::=     declaration_list:dl
-                    {:
-                        System.out.println("Fin analisis sintactico.");
-                        RESULT=dl; //envio la raiz para ser dibujado en grapher
-                    :};
-
-declaration_list    ::=     declaration_list:list declaration:d
+program             ::= declaration_list:dl 
                             {:
-                                if(d != null){
-                                    list.agregarDeclaracion(d);
-                                }else{
-                                    //no deberia llegar nunca aqui.
-                                    list = new Program();
-                                }
-                                RESULT=list;
-                            :}
-                            |
-                            declaration:d
-                            {:
-                                Program lista = new Program();
-                                lista.agregarDeclaracion(d);
-                                RESULT=lista;
+                                this.parser.cadena = "program ::= declaration_list \n"+this.parser.cadena;
+                                System.out.println("Fin de analisis sintactico");
+                                System.out.println(this.parser.cadena);
+                                RESULT = dl;
                             :};
 
-declaration     ::=     var_declaration:v
-                        {:
-                            RESULT=v;
-                        :}
-                        |
-                        fun_declaration:f
-                        {:
-                            RESULT=f;
-                        :};
-
-var_declaration     ::=     type_specifier:te ID:id PUNTOCOMA
+declaration_list    ::= declaration_list:dl declaration:d
                             {:
-                                if(te.equalsIgnoreCase("int")){
+                                this.parser.cadena = "declaration_list ::= declaration_list declaration \n"+this.parser.cadena;
+                                if(d != null){
+                                    dl.agregarDeclaracion(d);
+                                }
+                                RESULT=dl;
+                            :}
+                        | declaration:d 
+                            {:
+                                this.parser.cadena = "declaration_list ::= declaration \n"+this.parser.cadena;
+                                Program root = new Program();
+                                root.agregarDeclaracion(d);
+                                RESULT=root;
+                            :};
+
+declaration         ::= var_declaration:vd 
+                            {:
+                                this.parser.cadena = "declaration ::= var_declaration \n"+this.parser.cadena;
+                                RESULT=vd;
+                            :} 
+                        | fun_declaration:fd 
+                            {:
+                                this.parser.cadena = "declaration ::= fun_declaration \n"+this.parser.cadena;
+                                RESULT=fd;
+                            :}
+                        | error:e
+                            {:
+                                parser.report_error("Syntax error, skip rest",e);
+                            :};
+
+var_declaration     ::= type_specifier:ts ID:id PUNTOCOMA
+                            {:
+                                this.parser.cadena = "var_declaration ::= type_specifier ID SEMICOLON \n"+this.parser.cadena;
+                                if(ts.equalsIgnoreCase("int")){
                                     RESULT= new VarDec("INT",id, false);
                                 }else{
                                     RESULT=new VarDec("VOID",id, false);
                                 }
                             :}
-                            |
-                            type_specifier:te ID:id CORCH_IZQ NUM:num CORCH_DER PUNTOCOMA
+                        | type_specifier:ts ID:id CORCH_IZQ NUM:num CORCH_DER PUNTOCOMA 
                             {:
-                                if(te.equalsIgnoreCase("int")){
+                                this.parser.cadena = "var_declaration ::= type_specifier ID LSQUAREB NUM RSQUAREB SEMICOLON \n"+this.parser.cadena;
+                                if(ts.equalsIgnoreCase("int")){
                                     RESULT= new VarDec("INT", id, true, Integer.parseInt(num));
                                 }else{
                                     RESULT=new VarDec("VOID", id, true, Integer.parseInt(num));
                                 }
                             :};
 
-type_specifier      ::=     INT:i
+type_specifier      ::= INT:i
                             {:
+                                this.parser.cadena = "type_specifier ::= INT \n"+this.parser.cadena;
                                 RESULT=i;
-                            :}
-                            |
-                            VOID:v
+                            :} 
+                        | VOID:v 
                             {:
+                                this.parser.cadena = "type_specifier ::= VOID \n"+this.parser.cadena;
                                 RESULT=v;
                             :};
 
-fun_declaration     ::=     type_specifier:t ID:id PARENT_IZQ params:pa PARENT_DER compound_stmt:com
+fun_declaration     ::= type_specifier:ts ID:id PARENT_IZQ params:ps PARENT_DER compound_stmt:cs 
                             {:
+                                this.parser.cadena = "fun_declaration ::= type_specifier ID LCIRCLEB params RCIRCLEB compound_stmt \n"+this.parser.cadena;
                                 //ingreso la id al nodo anteriormente creado.
-                                ((FunDec) pa).setID(id);
+                                ((FunDec) ps).setID(id);
                                 //ingreso el tipo de funcion al nodo anteriormente creado.
-                                ((FunDec) pa).setTipoFunction(t);
+                                ((FunDec) ps).setTipoFunction(ts);
 
                                 //condicionante usado si los componentes existen o no.
-                                if(com != null){
-                                    ((FunDec) pa).setCompound_stmt(com);
+                                if(cs != null){
+                                    ((FunDec) ps).setCompound_stmt(cs);
                                 }
-                                RESULT=(Nodo) pa;
+                                RESULT=(Nodo) ps;
 
                             :};
 
-params      ::=     param_list:lista
-                    {:
-                        RESULT=lista;
-                    :}
-                    |
-                    VOID:v
-                    {:
-                        //se crea el nodo directamente sin parametros.
-                        RESULT=new FunDec(true);
-                    :};
-
-param_list  ::=     param_list:list COMA param:p
-                    {:
-                        //condicionante si el parametro no es nulo. en ese caso se agrega a la lista de paramentros del nodo Funcion.
-                        if(p != null){
-                            ((FunDec)list).agregarParametro(p);
-                        }else{
-                            //nunca entra aqui.
-                            list=new FunDec();
-                        }
-                        RESULT=list;
-                    :}
-                    |
-                    param:p
-                    {:
-                        //creo el nodo de la funcion quen contendra la lista de parametros.
-                        FunDec list= new FunDec();
-                        //agrego el parametro a la lista del nodo.
-                        list.agregarParametro(p);
-                        RESULT=list;
-                    :};
-
-param   ::=     type_specifier:t ID:id
-                {:
-                    //se crea el nodo parametro.
-                    RESULT=new Param(t,id,false);
-                :}
-                |
-                type_specifier:t ID:id CORCH_IZQ CORCH_DER
-                {:
-                    //se crea el nodo parametro (parametro vector).
-                    RESULT=new Param(t, id, true);
-                :};
-
-compound_stmt   ::=     LLAVE_IZQ local_declarations:list_dec statement_list:list_sta LLAVE_DER
-                        {:
-                            RESULT= new Compound(list_dec,list_sta);
-                        :};
-
-local_declarations      ::=     local_declarations:list var_declaration:var
-                                {:
-                                    //condicionante usado si el nodo variable es nulo.
-                                    if(var != null){
-                                        list.add(var);
-                                    }else{
-                                        //no entra aqui.
-                                        list=new ArrayList<Nodo>();
-                                    }
-                                    RESULT=list;
-                                :}
-                                |
-                                empty
-                                {:
-                                    //se crea la lista de nodos de variables locales.
-                                    ArrayList<Nodo> list = new ArrayList<Nodo>();
-                                    RESULT=list;//se envia la lista creada.
-                                :}; 
-
-statement_list      ::=     statement_list:list statement:sta
+params              ::= param_list:pl
                             {:
-                                //condicionante usado si el nodo Statement es nulo.
-                                if(sta != null){
-                                    list.add(sta);
-                                }else{
-                                    //no deberia entrar aqui.
-                                    list= new ArrayList<Nodo>();
+                                this.parser.cadena = "params ::= param_list \n"+this.parser.cadena;
+                                RESULT=pl;
+                            :} 
+                        | VOID
+                            {:
+                                this.parser.cadena = "params ::= VOID \n"+this.parser.cadena;
+                                //se crea el nodo directamente sin parametros.
+                                RESULT=new FunDec(true);
+                            :};
+
+param_list          ::= param_list:pl COMA param:p
+                            {:
+                                this.parser.cadena = "param_list ::= param_list COMMA param \n"+this.parser.cadena;
+                                //condicionante si el parametro no es nulo. en ese caso se agrega a la lista de paramentros del nodo Funcion.
+                                if(p != null){
+                                    ((FunDec)pl).agregarParametro(p);
                                 }
-                                RESULT=list;
-                            :}
-                            |
-                            empty
+                                RESULT=pl;
+                            :} 
+                        | param:p
                             {:
+                                this.parser.cadena = "param_list ::= param \n"+this.parser.cadena;
+                                //creo el nodo de la funcion quen contendra la lista de parametros.
+                                FunDec list= new FunDec();
+                                //agrego el parametro a la lista del nodo.
+                                list.agregarParametro(p);
+                                RESULT=list;
+                            :};
+
+param               ::= type_specifier:ts ID:id
+                            {:
+                                this.parser.cadena = "param ::= type_specifier \n"+this.parser.cadena;
+                                //se crea el nodo parametro.
+                                RESULT=new Param(ts,id,false);
+                            :}	
+                        | type_specifier:ts ID:id CORCH_IZQ CORCH_DER 
+                            {:
+                                this.parser.cadena = "param ::= type_specifier ID CORCH_IZQ CORCH_DER \n"+this.parser.cadena;
+                                //se crea el nodo parametro (parametro vector).
+                                RESULT=new Param(ts, id, true);
+                            :};
+
+compound_stmt       ::= LLAVE_IZQ local_declarations:ld statement_list:sl LLAVE_DER 
+                            {:
+                                this.parser.cadena = "compound_stmt ::= LCURLYB local_declarations statement_list RCURLYB \n"+this.parser.cadena;
+                                RESULT= new Compound(ld,sl);
+                            :};
+
+local_declarations  ::= local_declarations:ld var_declaration:vd 
+                            {:
+                                this.parser.cadena = "local_declarations ::= local_declarations var_declaration \n"+this.parser.cadena;
+                                //condicionante usado si el nodo variable es nulo.
+                                if(vd != null){
+                                    ld.add(vd);
+                                }
+                                RESULT=ld;
+                            :}
+                        |
+                            {:
+                                this.parser.cadena = "local_declarations ::= EMPTY \n"+this.parser.cadena;
+                                //se crea la lista de nodos de variables locales.
+                                ArrayList<Nodo> list = new ArrayList<Nodo>();
+                                RESULT=list;//se envia la lista creada.
+                            :};
+
+statement_list      ::= statement_list:sl statement:s 
+                            {:
+                                this.parser.cadena = "statement_list ::= statement_list statement \n"+this.parser.cadena;
+                                //condicionante usado si el nodo Statement es nulo.
+                                if(s != null){
+                                    sl.add(s);
+                                }
+                                RESULT=sl;
+                            :}  
+                        |
+                            {:
+                                this.parser.cadena = "statement_list ::= EMPTY \n"+this.parser.cadena;
                                 //se crea la lista de nodos de statements.
                                 ArrayList<Nodo> list = new ArrayList<Nodo>();
                                 RESULT=list;//se envia la lista creada.
                             :};
 
-statement       ::=     expression_stmt:ex
-                        {:
-                            //corresponde a un numero. lo que seria muy extraño, ¿la gramatica aceptaria '1;' sin asignacion a variable?
-                            //if(ex instanceof String){
-                            //    RESULT=new Var(Integer.parseInt((String)ex));
-                            //}else{
-                            //    RESULT=(Nodo)ex; //en teoria esta mal, pero se parsea ya que es feo que llege al 'num;'.    
-                            //}
-                            RESULT=ex;
-                        :}
-                        |
-                        compound_stmt:com
-                        {:
-                            RESULT=com;
-                        :}
-                        |
-                        selection_stmt:sel
-                        {:
-                            RESULT=sel;
-                        :}
-                        |
-                        iteration_stmt:ite
-                        {:
-                            RESULT=ite;
-                        :}
-                        return_stmt:ret
-                        {:
-                            RESULT=ret;
-                        :};
-
-expression_stmt     ::=     expression:e PUNTOCOMA
+statement           ::= expression_stmt:es 
                             {:
+                                this.parser.cadena = "statement ::= expression_stmt \n"+this.parser.cadena;
+                                RESULT=es;
+                            :} 
+                        | compound_stmt:cs 
+                            {:
+                                this.parser.cadena = "statement ::= compound_stmt \n"+this.parser.cadena;
+                                RESULT=cs;
+                            :} 
+                        | selection_stmt:ss 
+                            {:
+                                this.parser.cadena = "statement ::= selection_stmt \n"+this.parser.cadena;
+                                RESULT=ss;
+                            :} 
+                        | iteration_stmt:is 
+                            {:
+                                this.parser.cadena = "statement ::= iteration_stmt \n"+this.parser.cadena;
+                                RESULT=is;
+                            :}	
+                        | return_stmt:rs 
+                            {:
+                                this.parser.cadena = "statement ::= return_stmt \n"+this.parser.cadena;
+                                RESULT=rs;
+                            :};
+
+expression_stmt     ::= expression:e PUNTOCOMA 
+                            {:
+                                this.parser.cadena = "expression_stmt ::= expression PUNTOCOMA \n"+this.parser.cadena;
+                                RESULT=e;
+                            :} 
+                        | PUNTOCOMA 
+                            {:
+                                this.parser.cadena = "expression_stmt ::= PUNTOCOMA \n"+this.parser.cadena;
+                            :};
+
+selection_stmt      ::= IF PARENT_IZQ expression:e PARENT_DER statement:s 
+                            {:
+                                this.parser.cadena = "selection_stmt ::= IF LCURLYB expression RCURLYB statement \n"+this.parser.cadena;
+                                RESULT= new Statement("if", e, s);
+                                
+                            :} 
+                        | IF PARENT_IZQ expression:e PARENT_DER statement:s1 ELSE statement:s2 
+                            {:
+                                this.parser.cadena = "selection_stmt ::= IF LCIRCLEB expression RCIRCLEB statement ELSE statement \n"+this.parser.cadena;
+                                RESULT=new Statement("if-else",e, s1, s2);
+                            :};
+
+iteration_stmt      ::= while_stmt:ws 
+                            {:
+                                this.parser.cadena = "iteration_stmt ::= while_stmt \n"+this.parser.cadena;
+                                RESULT=ws;
+                            :} 
+                        | for_stmt:fs 
+                            {:
+                                this.parser.cadena = "iteration_stmt ::= for_stmt \n"+this.parser.cadena;
+                                RESULT=fs;
+                            :};
+
+while_stmt          ::= WHILE PARENT_IZQ expression:e PARENT_DER statement:s 
+                            {:
+                                this.parser.cadena = "while_stmt ::= WHILE LCIRCLEB expression RCIRCLEB statement \n"+this.parser.cadena;
+                                RESULT=new Statement("while",e,s);
+                            :};
+
+for_stmt            ::= FOR PARENT_IZQ expression:e1 COMA expression:e2 COMA expression:e3 PARENT_DER statement:s 
+                            {:
+                                this.parser.cadena = "for_stmt ::= FOR LCIRCLEB expression SEMICOLON expression SEMICOLON expression RCIRCLEB statement \n"+this.parser.cadena;
+                                RESULT=new Statement("for",e1,e2,e3,s);
+                            :};
+
+return_stmt         ::= RETURN PUNTOCOMA 
+                            {:
+                                this.parser.cadena = "return ::= RETURN SEMICOLON \n"+this.parser.cadena;
+                                RESULT=new Statement("return");
+                                
+                            :}
+                        | RETURN expression:e PUNTOCOMA 
+                            {:
+                                this.parser.cadena = "return ::= RETURN expression SEMICOLON \n"+this.parser.cadena;
+                                RESULT=new Statement("return",e);
+                            :};
+
+expression          ::= var:v ASSIGN:a expression:e 
+                            {:
+                                this.parser.cadena = "expression ::= var ASSIGN expression \n"+this.parser.cadena;
+                                //creo el nodo expression.
+                                Expression exp = new Expression(v,a,e);
+                                //asigno el valor a la expresion.
+                                exp.asignarValor();
+                                RESULT=exp;
+                            :} 
+                        | simple_expression:se 
+                            {:
+                                this.parser.cadena = "expression ::= simple_expression \n"+this.parser.cadena;
+                                RESULT=se;
+                            :};
+
+var                 ::= ID:id
+                            {:
+                                this.parser.cadena = "var ::= ID \n"+this.parser.cadena;
+                                //se crea el nodo Var.
+                                RESULT= new Var(id);
+                            :} 
+                        | ID:id CORCH_IZQ expression:e CORCH_DER 
+                            {:
+                                this.parser.cadena = "var ::= ID LSQUAREB expression RSQUAREB \n"+this.parser.cadena;
+                                RESULT= new Var(id,e);
+                            :};
+
+simple_expression   ::= additive_expression:ae1 relop:r additive_expression:ae2 
+                            {:
+                                this.parser.cadena = "simple_expression ::= additive_expression relop aditive_expression \n"+this.parser.cadena;
+                                //se crea el Nodo expresion con la nueva operacion.
+                                Expression e = new Expression(ae1, r.toString(), ae2);
+                                //es una expresion de comparacion, por lo que se le da true al flag(importante para derivar los resultados de operaciones).
+                                e.setEsComparacion(true);
+                                RESULT=e;
+                            :} 
+                        | additive_expression:ae 
+                            {:
+                                this.parser.cadena = "simple_expression ::= additive_expression \n"+this.parser.cadena;
+                                RESULT=ae;
+                            :};
+
+relop               ::= MENIGUAL:me 
+                            {:
+                                this.parser.cadena = "relop ::= LEQ \n"+this.parser.cadena;
+                                RESULT=me;
+                            :}
+                        | MENOR:men 
+                            {:
+                                this.parser.cadena = "relop ::= LT \n"+this.parser.cadena;
+                                RESULT=men;
+                            :}
+                        | MAYOR:ma 
+                            {:
+                                this.parser.cadena = "relop ::= GT \n"+this.parser.cadena;
+                                RESULT=ma;
+                            :}
+                        | MAYIGUAL:may 
+                            {:
+                                this.parser.cadena = "relop ::= GEQ \n"+this.parser.cadena;
+                                RESULT=may;
+                            :}
+                        | IGUALIGUAL:ii 
+                            {:
+                                this.parser.cadena = "relop ::= EQ \n"+this.parser.cadena;
+                                RESULT=ii;
+                            :}
+                        | DISTINTO:dis 
+                            {:
+                                this.parser.cadena = "relop ::= NEQ \n"+this.parser.cadena;
+                                RESULT=dis;
+                            :};
+
+additive_expression ::= additive_expression:ae addop:a term:t 
+                            {:
+                                this.parser.cadena = "additive_expression ::= additive_expression addop term \n"+this.parser.cadena;
+                                //se crea el nodo expresion.
+                                Expression e = new Expression(ae,a,t);
+                                //se calcula el valor de la operacion.
+                                e.calculoValor();
+                                RESULT=e;
+                            :} 
+                        | term:t 
+                            {:
+                                this.parser.cadena = "additive_expression ::= term \n"+this.parser.cadena;
+                                RESULT=t;
+                            :};
+
+addop               ::= SUMA:sum 
+                            {:
+                                this.parser.cadena = "addop ::= SUMA \n"+this.parser.cadena;
+                                RESULT=sum;
+                            :} 
+                        | RESTA:res 
+                            {:
+                                this.parser.cadena = "addop ::= RESTA \n"+this.parser.cadena;
+                                RESULT=res;
+                            :};
+
+term                ::= term:e mulop:m factor:f 
+                            {:
+                                this.parser.cadena = "term ::= term mulop factor \n"+this.parser.cadena;
+                                //se crea el nodo expression.
+                                Expression exp = new Expression(e,m,f);
+                                //se calcula el valor de la operacion.
+                                exp.calculoValor();
+                                RESULT=exp;
+                            :} 
+                        | factor:f 
+                            {:
+                                this.parser.cadena = "term ::= factor \n"+this.parser.cadena;
+                                RESULT=f;
+                            :};
+
+mulop               ::= MULTIPLICACION:mu 
+                            {:
+                                this.parser.cadena = "mulop ::= MULT \n"+this.parser.cadena;
+                                RESULT=mu;
+                            :} 
+                        | DIVISION:div 
+                            {:
+                                this.parser.cadena = "mulop ::= DIV \n"+this.parser.cadena;
+                                RESULT=div;
+                            :};
+
+factor              ::= factor:f powop:p exp:e 
+                            {:
+                                this.parser.cadena = "factor ::= factor powop exp \n"+this.parser.cadena;
+                                RESULT=new Expression(f,p,e);
+                            :}
+                        | exp:e 
+                            {:
+                                this.parser.cadena = "factor ::= exp \n"+this.parser.cadena;
+                                RESULT=e;
+                            :};
+
+powop               ::= EXPO_1:e1 
+                            {:
+                                this.parser.cadena = "powop ::= EXPO1 \n"+this.parser.cadena;
+                                RESULT=e1;
+                            :}
+                        | EXPO_2:e2 
+                            {:
+                                this.parser.cadena = "powop ::= EXPO2 \n"+this.parser.cadena;
+                                RESULT=e2;
+                            :};
+
+exp                 ::= PARENT_IZQ expression:e PARENT_DER 
+                            {:
+                                this.parser.cadena = "exp ::= PARENT_IZQ expression PARENT_DER \n"+this.parser.cadena;
                                 RESULT=e;
                             :}
-                            |
-                            PUNTOCOMA
+                        | var:v 
                             {:
-                            :};
-
-selection_stmt      ::=     IF PARENT_IZQ expression PARENT_DER statement 
-                            {:
+                                this.parser.cadena = "exp ::= var \n"+this.parser.cadena;
+                                RESULT=v;
                             :}
-                            |
-                            IF PARENT_IZQ expression PARENT_DER statement ELSE statement
+                        | call:c 
                             {:
-                            :};
-
-iteration_stmt      ::=     while_stmt
-                            {:
+                                this.parser.cadena = "exp ::= call \n"+this.parser.cadena;
+                                RESULT=c;
                             :}
-                            |
-                            for_stmt
+                        | NUM:num
                             {:
+                                this.parser.cadena = "exp ::= NUM \n"+this.parser.cadena;
+                                //creo el nodo var que guardara el numero.
+                                RESULT=new Var(Integer.parseInt(num));
                             :};
 
-while_stmt      ::=     WHILE PARENT_IZQ expression PARENT_DER statement
-                        {:
-                        :};
+call                ::= ID:id PARENT_IZQ args:ar PARENT_DER 
+                            {:
+                                this.parser.cadena = "call ::= ID:id PARENT_IZQ args PARENT_DER \n"+this.parser.cadena;
+                                //se ingresa la id al nodo en ascenso.
+                                ((Call)ar).setID(id);
+                                RESULT=ar;
+                            :};
 
-for_stmt        ::=     FOR PARENT_IZQ expression COMA expression COMA expression PARENT_DER statement
-                        {:
-                        :};
+args                ::= arg_list:al 
+                            {:
+                                this.parser.cadena = "args ::= arg_list \n"+this.parser.cadena;
+                                RESULT=al;
+                            :} 
+                        | 
+                            {:
+                                this.parser.cadena = "args ::= EMPTY \n"+this.parser.cadena;
+                                RESULT=new Call();
+                            :};
 
-return_stmt     ::=     RETURN PUNTOCOMA
-                        {:
-                        :}
-                        |
-                        RETURN expression PUNTOCOMA
-                        {:
-                        :};
-
-expression      ::=     var:v ASSIGN:as expression:ex
-                        {:
-                            //desde aqui las derivaciones por la derecha pueden ser nodos (Call, Var o Expression) 
-                            //o NUM (como String, pero guardado en el nodo como Integer).
-                            //por lo que es nesesario diferenciar el guardado en el nodo.
-                            //if(ex instanceof String){
-                            //    //expression correpsonde a un numero.
-                            //    RESULT=new Expression(v,as,Integer.parseInt((String)ex));
-                            //}else{
-                            //    //corresponde a un Nodo.
-                            //    RESULT=new Expression(v,as,(Nodo)ex);
-                            //}
-
-                            //creo el nodo expression.
-                            Expression e = new Expression(v,as,ex);
-                            //asigno el valor.
-                            e.asignarValor();
-                            
-                            RESULT=e;
-                        :}
-                        |
-                        simple_expression:si
-                        {:
-                            RESULT=si;
-                        :};
-
-var         ::=     ID:id
-                    {:
-                        //se crea el nodo Var.
-                        RESULT= new Var(id);
-                    :}
-                    |
-                    ID:id CORCH_IZQ expression:ex CORCH_DER
-                    {:
-                        //se crea el Nodo Var con un id y un Nodo expresion que puede ser un Nodo o un Numero.
-                        //if(ex instanceof Nodo){
-                        //    RESULT= new Var(id,(Nodo)ex);    
-                        //}else{
-                        //    RESULT= new Var(id,Integer.parseInt((String)ex));
-                        //}
-                        RESULT= new Var(id,ex);
-                    :};
-
-simple_expression       ::=     additive_expression:a relop:ope additive_expression:b
-                                {:
-                                    //se condicionan todas las opciones posibles de derivaciones.
-                                    //if(a instanceof String && b instanceof String){
-                                    //    RESULT=new Expression(Integer.parseInt((String)a),ope,Integer.parseInt((String)b));
-                                    //}else if(a instanceof String && b instanceof Nodo){
-                                    //    RESULT=new Expression(Integer.parseInt((String)a),ope,(Nodo)b);
-                                    //}else if(a instanceof Nodo && b instanceof String){
-                                    //    RESULT=new Expression((Nodo)a,ope,Integer.parseInt((String)b));
-                                    //}else if(a instanceof Nodo && b instanceof Nodo){
-                                    //    RESULT=new Expression((Nodo)a,ope,(Nodo)b);
-                                    //}
-                                    //se crea el Nodo expresion con la nueva operacion.
-                                    Expression e = new Expression(a, ope, b);
-                                    //es una expresion de comparacion, por lo que se le da true al flag(importante para derivar los resultados de operaciones).
-                                    e.setEsComparacion(true);
-                                    RESULT=e;
-                                :}
-                                |
-                                additive_expression:ad
-                                {:
-                                    RESULT=ad;
-                                :};
-
-relop       ::=     MENIGUAL:me
-                    {:
-                        RESULT=me;
-                    :}
-                    MENOR:men
-                    {:
-                        RESULT=men;
-                    :}
-                    MAYOR:ma
-                    {:
-                        RESULT=ma;
-                    :}
-                    MAYIGUAL:may
-                    {:
-                        RESULT=may;
-                    :}
-                    IGUALIGUAL:ii
-                    {:
-                        RESULT=ii;
-                    :}
-                    DISTINTO:dis
-                    {:
-                        RESULT=dis;
-                    :};
-
-additive_expression     ::=     additive_expression:a addop:ope term:b
-                                {:
-
-                                    //otra nueva operacion. se crea otro nodo.
-                                    //if(a instanceof String && b instanceof String){
-                                    //    RESULT=new Expression(Integer.parseInt((String)a),ope,Integer.parseInt((String)b));
-                                    //}else if(a instanceof String && b instanceof Nodo){
-                                    //    RESULT=new Expression(Integer.parseInt((String)a),ope,(Nodo)b);
-                                    //}else if(a instanceof Nodo && b instanceof String){
-                                    //    RESULT=new Expression((Nodo)a,ope,Integer.parseInt((String)b));
-                                    //}else if(a instanceof Nodo && b instanceof Nodo){
-                                    //    RESULT=new Expression((Nodo)a,ope,(Nodo)b);
-                                    //}
-                                    //se crea el nodo expresion.
-                                    Expression e = new Expression(a,ope,b);
-                                    //se calcula el valor de la operacion.
-                                    e.calculoValor();
-                                    RESULT=e;
-                                :}
-                                |
-                                term:t
-                                {:
-                                    RESULT=t;
-                                :};
-
-addop       ::=     SUMA:sum
-                    {:
-                        RESULT=sum;
-                    :}
-                    |
-                    RESTA:res
-                    {:
-                        RESULT=res;
-                    :};
-
-term        ::=     term:a mulop:ope factor:b
-                    {:
-                        //nueva operacion, creacion de nuevo nodo Expression.
-                        //if(a instanceof String && b instanceof String){
-                        //    RESULT=new Expression(Integer.parseInt((String)a),ope,Integer.parseInt((String)b));
-                        //}else if(a instanceof String && b instanceof Nodo){
-                        //    RESULT=new Expression(Integer.parseInt((String)a),ope,(Nodo)b);
-                        //}else if(a instanceof Nodo && b instanceof String){
-                        //    RESULT=new Expression((Nodo)a,ope,Integer.parseInt((String)b));
-                        //}else if(a instanceof Nodo && b instanceof Nodo){
-                        //    RESULT=new Expression((Nodo)a,ope,(Nodo)b);
-                        //}
-                        //se crea el nodo expression.
-                        Expression e = new Expression(a,ope,b);
-                        //se calcula el valor de la operacion.
-                        e.calculoValor();
-                        RESULT=e;
-                    :}
-                    |
-                    factor:f
-                    {:
-                        RESULT=f;
-                    :};
-
-mulop       ::=     MULTIPLICACION:mu
-                    {:
-                        RESULT=mu;
-                    :}
-                    |
-                    DIVISION:div
-                    {:
-                        RESULT=div;
-                    :};
-
-factor      ::=     factor:a powop:ope exp:b
-                    {:
-                        //nueva operacion, se crea nuevo nodo Expression.
-                        //if(a instanceof String && b instanceof String){
-                        //                RESULT=new Expression(Integer.parseInt((String)a),ope,Integer.parseInt((String)b));
-                        //            }else if(a instanceof String && b instanceof Nodo){
-                        //                RESULT=new Expression(Integer.parseInt((String)a),ope,(Nodo)b);
-                        //            }else if(a instanceof Nodo && b instanceof String){
-                        //                RESULT=new Expression((Nodo)a,ope,Integer.parseInt((String)b));
-                        //            }else if(a instanceof Nodo && b instanceof Nodo){
-                        //                RESULT=new Expression((Nodo)a,ope,(Nodo)b);
-                        //            }
-                        //si no funciona, usar el condicionante.
-
-
-                        RESULT=new Expression(a,ope,b);
-                    :}
-                    |
-                    exp:e //puede llegar como Nodo o numero (dentro de nodo Var).
-                    {:
-                        RESULT=e;
-                    :};
-
-powop       ::=     EXPONENCIACION_1:exp1 //^
-                    {:
-                        RESULT=exp1;
-                    :}
-                    |
-                    EXPONENCIACION_2:exp2 //**
-                    {:
-                        RESULT=exp2;
-                    :};                                                                                                                                                                                                                                                                                        
-
-exp         ::=     PARENT_IZQ expression:ex PARENT_DER
-                    {:
-                        RESULT=ex;
-                    :}
-                    |
-                    var:v
-                    {:
-                        RESULT=v;
-                    :}
-                    |
-                    call:c
-                    {:
-                        RESULT=c;
-                    :}
-                    |
-                    NUM:num
-                    {:
-                        //creo el nodo var que guardara el numero.
-                        RESULT=new Var(Integer.parseInt(num));
-
-                        
-                    :};
-
-call    ::=     ID:id PARENT_IZQ args:arg PARENT_DER
-                {:
-                    //se ingresa la id al nodo en ascenso.
-                    ((Call)arg).setID(id);
-                    RESULT=arg;
-
-                :};
-
-args    ::=     arg_list:arg
-                {:
-                    RESULT=arg;
-                :}
-                |
-                empty
-                {:
-                    //en caso de que no haya argumentos, creo el nodo desde aqui.
-                    //ya que no se derivara arg_list.
-                    RESULT=new Call();
-                :};
-
-arg_list    ::=     arg_list:list COMA expression:ex
-                    {:
-                        if(ex != null){
-                            ((Call)list).agregarArgumento(ex);
-                        }else{
-                            //no deberia entrar aqui.
-                            list=new Call();
-                        }
-                        RESULT=list;
-
-                    :}
-                    |
-                    expression:ex
-                    {:
-                        //primer argumento, creo el nodo e ingreso la expresion a la lista.
-                        Call lista = new Call();
-                        lista.agregarArgumento(ex);
-                        RESULT=lista;
-                    :};
-
-/* Gramatica nesesaria */
-empty   ::= /* vacio */;                                                   
+arg_list            ::= arg_list:al COMA expression:e 
+                            {:
+                                this.parser.cadena = "arg_list ::= arg_list COMMA expression \n"+this.parser.cadena;
+                                if(e != null){
+                                    ((Call)al).agregarArgumento(e);
+                                }
+                                RESULT=al;
+                            :}  	
+                        | expression:e 
+                            {:
+                                this.parser.cadena = "arg_list ::= expression \n"+this.parser.cadena;
+                                //primer argumento, creo el nodo e ingreso la expresion a la lista.
+                                Call lista = new Call();
+                                lista.agregarArgumento(e);
+                                RESULT=lista;
+                            :};

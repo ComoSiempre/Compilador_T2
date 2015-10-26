@@ -136,10 +136,9 @@ public class Compilador {
             Program programa = (Program) parser.parse().value;
             GrapherVisitor grapher = new GrapherVisitor(pathBase);
             grapher.visitar(programa);
+            
         }catch(Exception ex){
             ex.printStackTrace();
-            
-            
             
         }
     }

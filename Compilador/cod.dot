@@ -1,51 +1,19 @@
 digraph G { 
 "nodo0"[label="Progama"]; 
-"nodo1"[label="a:INT"]; 
+"nodo1"[label="Funcion: main,int"]; 
 "nodo0"->"nodo1"; 
-"nodo2"[label="a_b3:INT"]; 
-"nodo0"->"nodo2"; 
-"nodo3"[label="bcfg:INT[3]"]; 
-"nodo0"->"nodo3"; 
-"nodo4"[label="adfg:VOID"]; 
-"nodo0"->"nodo4"; 
-"nodo5"[label="Funcion: main,int"]; 
-"nodo0"->"nodo5"; 
-"nodo6"[label="Param[a,int]"]; 
-"nodo5"->"nodo6"; 
-"nodo7"[label="Param[b,int[]]"]; 
-"nodo5"->"nodo7"; 
-"nodo8"[label="Compound Statement"]; 
-"nodo5"->"nodo8"; 
-"nodo9"[label="x:INT"]; 
-"nodo8"->"nodo9"; 
-"nodo10"[label="y:INT"]; 
-"nodo8"->"nodo10"; 
-"nodo11"[label="::=
-Value: 11"]; 
-"nodo8"->"nodo11"; 
-"nodo12"[label="Variable: x"]; 
-"nodo11"->"nodo12"; 
-"nodo13"[label="+
-Value: 11"]; 
-"nodo11"->"nodo13"; 
-"nodo14"[label="*
-Value: 6"]; 
-"nodo13"->"nodo14"; 
-"nodo15"[label="/
-Value: 2"]; 
-"nodo14"->"nodo15"; 
-"nodo16"[label="4"]; 
-"nodo15"->"nodo16"; 
-"nodo17"[label="2"]; 
-"nodo15"->"nodo17"; 
-"nodo18"[label="3"]; 
-"nodo14"->"nodo18"; 
-"nodo19"[label="5"]; 
-"nodo13"->"nodo19"; 
-"nodo20"[label="Call : funcion"]; 
-"nodo8"->"nodo20"; 
-"nodo21"[label="Variable: x"]; 
-"nodo20"->"nodo21"; 
-"nodo22"[label="Variable: y"]; 
-"nodo20"->"nodo22"; 
+"nodo2"[label="Compound Statement"]; 
+"nodo1"->"nodo2"; 
+"nodo3"[label="for"]; 
+"nodo2"->"nodo3"; 
+"nodo4"[label="Variable: a"]; 
+"nodo3"->"nodo4"; 
+"nodo5"[label="Variable: b"]; 
+"nodo3"->"nodo5"; 
+"nodo6"[label="Variable: c"]; 
+"nodo3"->"nodo6"; 
+"nodo7"[label="Compound Statement"]; 
+"nodo3"->"nodo7"; 
+"nodo8"[label="a:VOID"]; 
+"nodo7"->"nodo8"; 
 }

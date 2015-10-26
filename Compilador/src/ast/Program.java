@@ -9,8 +9,8 @@ import java.util.*;
 import syntaxVisitor.GrapherVisitor;
 
 /**
- *
- * @author jona
+ * Clase que representa el nodo raiz  del AST y desde el cual comienza el recorrida por patron visitor.
+ * @author Jonathan Vasquez - Eduardo Tapia.
  */
 public class Program implements visitaNodo {
     

@@ -14,8 +14,8 @@ import java.util.Stack;
 import visitor.visitor;
 
 /**
- *
- * @author jona
+ * Clase usada para la generacion de codigo del arbol AST para la crecion de las imagenes en la aplicacion GraphViz.
+ * @author Jonathan Vasquez - eduardo Tapia.
  */
 public class GrapherVisitor implements visitor {
     String pathBase; //guardo la direccion del proyecto.
@@ -280,6 +280,54 @@ public class GrapherVisitor implements visitor {
         //ya visto el subarbol de call, elimino la raiz .
         this.auxPadres.pop();
         
+    }
+
+    @Override
+    public void visitar(Statement stmt) {
+        
+        //se genera el codigo del nodo.
+        String ident= stmt.toGrapher(this.cantNodosVisitados);
+        //se agrega al codigo general.
+        this.codigoGraph += ident;
+        //see obtiene el nombre ID del nodo para el enlace.
+        String [] delimitador = ident.split("\\[");
+        //se crea el enlace entre el nodo y su padre.
+        String enlace = this.auxPadres.peek()+"->"+delimitador[0]+"; \n";
+        //se agrega este enlace al codigo general.
+        this.codigoGraph += enlace;
+        //se agrega el nodo como el padre para la iniciacion de este sub-arbol.
+        this.auxPadres.push(delimitador[0]);
+        //se cuanta el nodo como visitado.
+        this.cantNodosVisitados++;
+        //condicionantes usadas para la visita dependiento del tipo de declaracion.
+        if(stmt.getTipoDeclaracion().equalsIgnoreCase("if") && stmt.getDeclaracion_else() == null){
+            //el nodo corresponde a un nodo de IF.
+            stmt.getExpresion().aceptar(this);
+            stmt.getDeclaracion().aceptar(this);
+        }else if(stmt.getTipoDeclaracion().equalsIgnoreCase("if-else") && stmt.getDeclaracion_else() != null){
+            //el nodo corresponde a un nodo IF-ELSE.
+            stmt.getExpresion().aceptar(this);
+            stmt.getDeclaracion().aceptar(this);
+            stmt.getDeclaracion_else().aceptar(this);
+        }else if(stmt.getTipoDeclaracion().equalsIgnoreCase("while")){
+            //el nodo corresponde a un nodo WHILE.
+            stmt.getExpresion().aceptar(this);
+            stmt.getDeclaracion().aceptar(this);
+            
+        }else if(stmt.getTipoDeclaracion().equalsIgnoreCase("for")){
+            //el nodo corresponde a un nodo FOR.
+            stmt.getExpresion().aceptar(this);
+            stmt.getExpresionFor2().aceptar(this);
+            stmt.getExpresionFor3().aceptar(this);
+            stmt.getDeclaracion().aceptar(this);
+            
+        }else if(stmt.getTipoDeclaracion().equalsIgnoreCase("return") && stmt.getExpresion() != null){
+            //el nodo corresponde a un nodo RETURN (gramatica 2).
+            stmt.getExpresion().aceptar(this);
+            
+        }
+        //al terminar las visitas, elimino la raiz de este sub-arbol.
+        this.auxPadres.pop();
     }
     
 }
