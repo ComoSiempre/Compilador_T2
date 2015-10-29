@@ -20,31 +20,25 @@ parser code{:
         System.exit(1);
     }
     public void report_error(String message, Object info) {
-        StringBuilder m = new StringBuilder("Error Sintactico");
+        StringBuilder m = new StringBuilder("Error Sintactico \n");
         if (info instanceof java_cup.runtime.Symbol) {
             java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            m.append("El ultimo simbolo detectado fue: ["+(String)s.value+"]");
             if (s.left >= 0) {                
                 m.append(" en linea "+(s.left+1));
                 if (s.right >= 0)
                     m.append(", columna "+(s.right+1));
             }
         }
-        m.append(" : "+message + " -> Parser");
+        //m.append(" : "+message + " -> Parser");
         System.err.println(m);
     }
-
+/*
     public void syntax_error(Symbol s){
-        System.out.println("compiler has detected a syntax error at line " + s.left + " column " + s.right); 
+        System.err.println("Se ha detectado un error sintactico " + s.left + " columna " + s.right); 
     }
-
-    public static void main(String [] args){
-        try{
-            Parser p = new Parser(new Lexer( new FileReader(args[0])));
-            Object result = p.parse().value;
-        }
-        catch(Exception e){
-        }
-    }
+*/
+    
 :};
 
 
@@ -140,10 +134,7 @@ declaration         ::= var_declaration:vd
                                 this.parser.cadena = "declaration ::= fun_declaration \n"+this.parser.cadena;
                                 RESULT=fd;
                             :}
-                        | error:e
-                            {:
-                                parser.report_error("Syntax error, skip rest",e);
-                            :};
+                        ;
 
 var_declaration     ::= type_specifier:ts ID:id PUNTOCOMA
                             {:

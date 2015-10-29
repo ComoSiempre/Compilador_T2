@@ -13,6 +13,8 @@ import java.util.logging.Logger;
 import ast.*;
 import Tables.*;
 import java.io.FileReader;
+import java.io.IOException;
+import java_cup.runtime.Symbol;
 import parser.*;
 import scanner.*;
 import syntaxVisitor.GrapherVisitor;
@@ -122,19 +124,73 @@ public class Compilador {
 	
     }
     /**
+     * metodo de separa el path de los ejercicion y obtiene solo el nombre del ejercicio.
+     * @param pathEj direccion del ejercicio.
+     * @return el nombre del ejercicio. ej: c:/...../ejercicio_1.txt  --->  ejercicio_1.txt
+     */
+    private static String getNombreEjercicio(String pathEj){
+        String [] delimitador=pathEj.split("/");
+        return delimitador[delimitador.length-1];
+    }
+    /**
+     * metodo encargado de recorrer, detectar y guardar los literales a la tabla de literales.
+     * @param lex Clase lexer donde esta el conjunto de simbolos segun el ejercicio.
+     * @param pathEj direccion path de los ejercicios.
+     * @param numEj numero del ejercicio, nesesario para la creacion de las keys de los literales.
+     */
+    private static void llenarLiterales(Lexer lex,String pathEj,int numEj){
+        try {
+            //ciclo usado para recorrer cada token del ejercicio.
+            while (true) {
+                //creo la variable de simbolo.
+                Symbol text;
+                //obtengo el token .
+                text = lex.next_token();
+                //condicionante usado si el token llego a EOF (Final de archivo).
+                switch(text.sym){
+                    case 0:
+                        System.out.println("llego al final de archivo");
+                    //reseteo el lexer, de esta forma es posible volver a analizar pero en el parser.
+                    lex.yyreset(new FileReader(pathEj));
+                    //retorno a la compilacion..
+                    return;
+                    
+                    case 31: //NUM.
+                        //guardo el literal a la tabla de literales.
+                        TablaLiterales.getInstancia().ingresarLiteral((String) text.value, numEj);
+                        break;
+                }//fin switch
+                
+            }//fin while.
+
+        } catch (IOException ex) {
+            Logger.getLogger(Compilador.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }//fin funcion 'llenarLiterales'
+    /**
      * Metodo utilizado para el proceso de compilacion de los ejercicios utilizando
      * las fases de analisis lexico y sintactico.
      * @param pathEjercicio la direccion del ejercicio a compilar
      * @param pathBase la direccion base del proyecto.
+     * @param numEjercicio el numero actual del ejercicio a compilar.
      */
-    public static void compilar(String pathEjercicio, String pathBase){
+    public static void compilar(String pathEjercicio, String pathBase, int numEjercicio){
         System.out.println("Comienzo compilacion");
         File arch = new File(pathEjercicio);
+        
         try{
+            //generacion analisis lexico del ejercicio.
             Lexer lexer = new Lexer(new FileReader(arch));
+            //ingreso los literales usados a la tabla de literales.
+            llenarLiterales(lexer,pathEjercicio,numEjercicio);
+            //generacion de parser para el analisis sintactico.
             Parser parser = new Parser(lexer);
+            //generacion del arbol sintactico abstracto.
             Program programa = (Program) parser.parse().value;
+            //creacion de objeto GrapherVisitor para la generacion de imagen del AST.
             GrapherVisitor grapher = new GrapherVisitor(pathBase);
+            //se inicia el recorrido del AST para la generacion de la imagen del arbol utilizando el patron visitor.
             grapher.visitar(programa);
             
         }catch(Exception ex){
@@ -142,6 +198,8 @@ public class Compilador {
             
         }
     }
+    
+    
     /**
      * @param args the command line arguments
      */
@@ -160,7 +218,8 @@ public class Compilador {
         //se mueven los archivos a los paquetes correspondientes.
         move();
         //comienza compilacion de ejercicios.
-        compilar(dir+"/ejemplo_1.txt",dir);
+        for(int i=0; i<2; i++)
+            compilar(dir+"/ejemplo_"+(i+1)+".txt",dir,(i+1));
         
     }
     

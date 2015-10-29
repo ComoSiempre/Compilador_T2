@@ -71,7 +71,6 @@ public class TablaLiterales {
      *  
      */
     public void ingresarLiteral(String literal, int numeroEjemplo){
-        
         this.literales.put(Integer.toString(numeroEjemplo)+"."+Integer.toString(serial), literal);
         this.serial++;
     }

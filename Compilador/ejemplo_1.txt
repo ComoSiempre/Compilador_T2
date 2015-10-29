@@ -1,4 +1,8 @@
-int main(void){
-	
-}
 
+int f(void){
+	if(a){
+		int g;
+		g ::= 1;
+		f ::= 23;
+	}
+}

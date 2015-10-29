@@ -1,0 +1,6 @@
+%este es el ordenamiento burbuja
+int d;
+int f(void){
+	d::= 45;
+	f::= 34;
+}

@@ -325,7 +325,7 @@ public class Lexer implements java_cup.runtime.Scanner {
   private int zzFinalHighSurrogate = 0;
 
   /* user code: */
-
+	
 
 
   /**

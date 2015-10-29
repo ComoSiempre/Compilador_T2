@@ -9,8 +9,9 @@ import java.util.ArrayList;
 import syntaxVisitor.GrapherVisitor;
 
 /**
- *
- * @author jona
+ * Clase usada para la generacion de Nodo Compound del AST.
+ * contendra las listas de variables locales y estamentos.
+ * @author Jonathan Vasquez - Eduardo Tapia.
  */
 public class Compound extends Nodo implements visitaNodo {
 
@@ -26,7 +27,7 @@ public class Compound extends Nodo implements visitaNodo {
     }
     
     public String toGrapher(int contNodos){
-        return "\"nodo"+contNodos+"\"[label=\"Compound Statement\"]; \n";
+        return "\"nodo"+contNodos+"\"[label=\"Compound Statement\", color=deepskyblue]; \n";
     }
     public ArrayList<Nodo> getLocalVar(){
         return this.listaLocalVar;

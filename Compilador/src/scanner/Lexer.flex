@@ -14,7 +14,7 @@ import Tables.*;
 %cup
 
 %{
-
+	
 %}
 
 
@@ -70,11 +70,15 @@ ESPACIOS     = {SALTO} | [ \t\f] /*tabulaciones o saltos de linea (whitespace)*/
 "NEQ" {return new Symbol(sym.DISTINTO,yyline,yycolumn,yytext());}
 ";" {return new Symbol(sym.PUNTOCOMA,yyline,yycolumn,yytext());}
 "," {return new Symbol(sym.COMA,yyline,yycolumn,yytext());}
+/*"++" {return new Symbol(sym.PLUSPLUS,yyline,yycolumn,yytext());}
+"--" {return new Symbol(sym.MINUSMINUS,yyline,yycolumn,yytext());}*/
 
 ([a-z]){LETRA}*_?{LETRA}*{DIGITO}* {return new Symbol(sym.ID,yyline,yycolumn,yytext());}
-{NUMERO} {return new Symbol(sym.NUM,yyline,yycolumn,yytext());}
+{NUMERO} {
+	return new Symbol(sym.NUM,yyline,yycolumn,yytext());
+}
 
-. 	{
-		System.err.println("Error Lexico: linea "+(yyline)+" columna "+(yycolumn)+ " token: "+yytext());
-	}
+. {	System.err.println("Error Lexico: linea "+(yyline)+" columna "+(yycolumn)+ " token: "+yytext()); 
+	
+}
 
