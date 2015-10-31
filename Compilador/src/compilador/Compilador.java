@@ -226,6 +226,8 @@ public class Compilador {
             compilar(dir+"/ejemplo_"+(i+1)+".txt",dir,(i+1));
         
         
+        
+        
     }//fin Main.
     
 }//fin Compilador.
