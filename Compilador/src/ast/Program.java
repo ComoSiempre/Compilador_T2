@@ -16,6 +16,9 @@ public class Program implements visitaNodo {
     
     ArrayList<Nodo> listaDeclaraciones=new ArrayList<>();
     
+    /**
+     * contructor default.
+     */
     public Program(){
         
     }

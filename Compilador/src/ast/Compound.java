@@ -20,18 +20,34 @@ public class Compound extends Nodo implements visitaNodo {
     //lista que guarda los nodos Statements.
     ArrayList<Nodo> listaStatements = new ArrayList<Nodo>();
     
-    //constructor que guarda las lista ya llenadas.
+    /**
+     * constructor que guarda las lista ya llenadas.
+     * @param local lista de variables locales en compound.
+     * @param sta lista de declaraciones en compound.
+     */
     public Compound(ArrayList<Nodo> local, ArrayList<Nodo> sta){
         this.listaLocalVar=local;
         this.listaStatements=sta;
     }
-    
+    /**
+     * metodo que genera el codigo del nodo compound para Graphviz.
+     * @param contNodos la cantidad de nodos visitados.
+     * @return codigo para Graphviz.
+     */
     public String toGrapher(int contNodos){
         return "\"nodo"+contNodos+"\"[label=\"Compound Statement\", color=deepskyblue]; \n";
     }
+    /**
+     * metodo GET que retorna la lista de variables locales.
+     * @return variables locales.
+     */
     public ArrayList<Nodo> getLocalVar(){
         return this.listaLocalVar;
     }
+    /**
+     * metodo GET que retorna la lista de declaraciones
+     * @return lista de declaraciones.
+     */
     public ArrayList<Nodo> getStatements(){
         return this.listaStatements;
     }

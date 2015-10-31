@@ -20,12 +20,20 @@ import visitor.visitor;
 public class GrapherVisitor implements visitor {
     String pathBase; //guardo la direccion del proyecto.
     int cantNodosVisitados; //contador de nodos visitados, nesesario para la creacion de nodos en el graphviz.
+    int numeroEjercicio; //variable que guarda el numero del ejercicio a compilar, nesesario para la creacion de archivos de imagen y .dot de cada ejercicio.
     String codigoGraph; //variable que guarda el codigo nesesario para la creacion grafica del AST en graphviz.
     Stack<String> auxPadres= new Stack<>(); //pila usada para guardar los padres en las visitas, nesesario para la creacion de nodods en graphviz.
-    public GrapherVisitor(String pathBase){
+    
+    /**
+     * constructor dle GrapherVisitor.
+     * @param pathBase la direccion base del proyecto.
+     * @param numEjercicio el numero actual del ejercicio.
+     */
+    public GrapherVisitor(String pathBase, int numEjercicio){
         this.cantNodosVisitados=0;
         this.pathBase=pathBase;
         this.codigoGraph="";
+        this.numeroEjercicio=numEjercicio;
     }
     /**
      * * metodo que genera la imagen del AST.
@@ -33,16 +41,15 @@ public class GrapherVisitor implements visitor {
      */
     public void generarGraph() {
         try{
-            BufferedWriter writer = new BufferedWriter(new FileWriter("cod.dot"));
-            //System.out.println(this.codigoGraph);
+            BufferedWriter writer = new BufferedWriter(new FileWriter("cod_"+this.numeroEjercicio+".dot"));
             writer.write("digraph G { \n");
             writer.write(this.codigoGraph);
             writer.flush();
             writer.write("}");
             writer.close();
             String dotPath="C:\\graphviz-2.38\\release\\bin\\dot.exe";//path del instalable del graphviz.
-            String fileInputPath=pathBase+"/cod.dot"; //txt del codigo .dot del arbol
-            String fileOutputPath = pathBase +"/testCod.png"; //salida de la imagen del codigo.
+            String fileInputPath=pathBase+"/cod_"+this.numeroEjercicio+".dot"; //txt del codigo .dot del arbol
+            String fileOutputPath = pathBase +"/img_cod_"+this.numeroEjercicio+".png"; //salida de la imagen del codigo.
             String tParam = "-Tpng";
             String tOParam = "-o";
             String [] cmd = new String[5];//variable para guardar el codigo en consola.
@@ -54,7 +61,6 @@ public class GrapherVisitor implements visitor {
             Runtime rt = Runtime.getRuntime();
             rt.exec(cmd);
             System.out.println("Imagen creada");
-            
         }catch(Exception ex){
             ex.printStackTrace();
         }
@@ -171,23 +177,7 @@ public class GrapherVisitor implements visitor {
         this.cantNodosVisitados++;
         expresion.getOperador1().aceptar(this);
         expresion.getOperador2().aceptar(this);
-//        
-//        //condicionantes para visitar las derivaciones segun corresponda.
-//        if(expresion.getOperador1() instanceof Nodo && expresion.getOperador2() instanceof Nodo){
-//            ((Nodo)expresion.getOperador1()).aceptar(this);
-//            ((Nodo)expresion.getOperador2()).aceptar(this);
-//            
-//        }else if(expresion.getOperador1() instanceof Integer && expresion.getOperador2() instanceof Nodo){
-//            //se crea el codigo del nuemro en la cadena de codigo graphviz.
-//            this.codigoGraph += this.auxPadres.peek()+"->"+(Integer)expresion.getOperador1()+"; \n";
-//            ((Nodo)expresion.getOperador2()).aceptar(this);
-//        }else if(expresion.getOperador1() instanceof Nodo && expresion.getOperador2() instanceof Integer){
-//            ((Nodo)expresion.getOperador1()).aceptar(this);
-//            this.codigoGraph += this.auxPadres.peek()+"->"+(Integer)expresion.getOperador2()+"; \n";
-//        }else if(expresion.getOperador1() instanceof Integer && expresion.getOperador2() instanceof Integer){
-//            this.codigoGraph += this.auxPadres.peek()+"->"+(Integer)expresion.getOperador1()+"; \n";
-//            this.codigoGraph += this.auxPadres.peek()+"->"+(Integer)expresion.getOperador2()+"; \n";
-//        }
+
         this.auxPadres.pop();
     }
 
@@ -232,26 +222,7 @@ public class GrapherVisitor implements visitor {
             this.auxPadres.push(delimitador[0]);
             this.cantNodosVisitados++;
             if(var.getID()!=null) ((Nodo)var.getExpression()).aceptar(this);
-//            //ahora se verifica si la expresion es un nodo o un numero.
-//            if(var.getID()==null){
-//                //la expresion corresponde a un numero.
-//                //se ingresa la cadena correpondiente al nodo var de numero.
-//                this.codigoGraph += var.toGrapherNumero(this.cantNodosVisitados);
-//            }else{
-//                //la espresion corresponde a un nodo.
-//                ((Nodo)var.getExpression()).aceptar(this);
-//            }
-//            
-//            
-//            if(var.getExpression() instanceof Integer){
-//                //la expresion corresponde a un numero.
-//                //creo la cadena del numero.
-//                this.codigoGraph += this.auxPadres.peek()+"->"+(Integer)var.getExpression()+"; \n";
-//            }else if(var.getExpression() instanceof Nodo){
-//                //la expresion corresponde a un Nodo.
-//                //visito el nodo.
-//                ((Nodo)var.getExpression()).aceptar(this);
-//            }
+
             this.auxPadres.pop();
         }
         

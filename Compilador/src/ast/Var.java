@@ -52,7 +52,11 @@ public class Var extends Nodo implements visitaNodo {
         this.Expression=null;
         this.ID=null;
     }
-    
+    /**
+     * metodo que genera el codigo Graphviz para el nodo Var.
+     * @param contNodos la cantidad de nodos visitados.
+     * @return codigo Graph del nodo.
+     */
     public String toGrapher(int contNodos){
         
         //condicionante usado para crar el codigo segun si la expresion corresponde a un numero o un nodo.
@@ -64,9 +68,18 @@ public class Var extends Nodo implements visitaNodo {
         }
            
     }
+    
+    /**
+     * metodo que genera el codigo GRaphviz del nodo Var en caso de que guarde un numero.
+     * @param contNodos la cantidad de nodos visitados.
+     * @return codigo Graph del nodo.
+     */
     public String toGrapherNumero(int contNodos){
         return "\"nodo"+contNodos+"\"[label=\""+this.numeroExpresion+"\"]; \n";
     }
+    
+    //metodos GET.
+    
     public String getID(){
         return this.ID;
     }

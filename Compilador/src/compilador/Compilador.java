@@ -24,7 +24,7 @@ import syntaxVisitor.GrapherVisitor;
  * Proyecto correspondiente a la integracion de la fase de analisis Sintactico en la implementacion del compilador
  * para el lenguaje K*, utilizando el analizador sintactico Java CUP.
  * @author:     Jonatham Vasquez - Eduardo Tapia
- * @version:    
+ * @version:    31/10/2015/3.2.1.
  */
 public class Compilador {
     /**
@@ -189,15 +189,15 @@ public class Compilador {
             //generacion del arbol sintactico abstracto.
             Program programa = (Program) parser.parse().value;
             //creacion de objeto GrapherVisitor para la generacion de imagen del AST.
-            GrapherVisitor grapher = new GrapherVisitor(pathBase);
+            GrapherVisitor grapher = new GrapherVisitor(pathBase,numEjercicio);
             //se inicia el recorrido del AST para la generacion de la imagen del arbol utilizando el patron visitor.
             grapher.visitar(programa);
             
         }catch(Exception ex){
             ex.printStackTrace();
             
-        }
-    }
+        }//fin try.
+    }//fin funcion compilar.
     
     
     /**

@@ -20,7 +20,9 @@ public class FunDec extends Nodo implements visitaNodo {
     String tipoIDFuntion; //variable que guarda el tipo de la funcion.
     boolean parametroVoid=false;//variable flag que detecta si la funcion no tiene parametros (VOID)
     
-    
+    /**
+     * metodo constructor default.
+     */
     public FunDec(){}
     
     /**
@@ -39,15 +41,7 @@ public class FunDec extends Nodo implements visitaNodo {
     public void agregarParametro(Nodo parametro){
         this.listaParametros.add(parametro);
     }
-    public void setID(String ID){
-        this.ID=ID;
-    }
-    public void setTipoFunction(String func){
-        this.tipoIDFuntion=func;
-    }
-    public void setCompound_stmt(Nodo compo){
-        this.compound_stmt=compo;
-    }
+    
     /**
      * metodo que genera el codigo en Graphviz.
      * @param contNodos el contador de nodos creados hasta ahora.
@@ -59,8 +53,23 @@ public class FunDec extends Nodo implements visitaNodo {
     public ArrayList<Nodo> getListaParametros(){
         return this.listaParametros;
     }
+    
+    //metodos GET.
+    
     public Nodo getCompound(){
         return this.compound_stmt;
+    }
+    
+    //metodods SET.
+    
+    public void setID(String ID){
+        this.ID=ID;
+    }
+    public void setTipoFunction(String func){
+        this.tipoIDFuntion=func;
+    }
+    public void setCompound_stmt(Nodo compo){
+        this.compound_stmt=compo;
     }
     @Override
     public void aceptar(GrapherVisitor v) {

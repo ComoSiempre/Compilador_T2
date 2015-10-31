@@ -8,8 +8,8 @@ package ast;
 import syntaxVisitor.GrapherVisitor;
 
 /**
- *
- * @author jona
+ * Clase que representa un Nodo VarDec, usado para las declaraciones de variables en los codigo a compilar.
+ * @author Jonathan Vasquez - Eduardo Tapia.
  */
 public class VarDec extends Nodo implements visitaNodo {
 

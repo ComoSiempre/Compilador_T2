@@ -33,39 +33,6 @@ public class Expression extends Nodo implements visitaNodo {
         this.operacion2=ex;
         
     }
-//    /**
-//     * constructor 2. usado en caso de que la expresion consiste en una operacion con numeros.
-//     * @param op1
-//     * @param op
-//     * @param numero 
-//     */
-//    public Expression(Nodo op1, String op, int numero){
-//        this.operacion1=op1;
-//        this.operador=op;
-//        this.operacion2=numero;
-//    }
-//    /**
-//     * contrcutor 3, usado en caso de que exista un numero en la drivacion de la izquierda en las gramaticas.
-//     * @param numero
-//     * @param op
-//     * @param op2 
-//     */
-//    public Expression(int numero, String op, Nodo op2){
-//        this.operacion1=numero;
-//        this.operador=op;
-//        this.operacion2=op2;
-//    }
-//    /**
-//     * contructor 4, usado en caso que la operacion es directamente ligada a numeros.
-//     * @param numero1
-//     * @param op
-//     * @param numero2 
-//     */
-//    public Expression(int numero1, String op, int numero2){
-//        this.operacion1=numero1;
-//        this.operador=op;
-//        this.operacion2=numero2;
-//    }
     /**
      * metodo que hace el calculo de 2 numeros segun un operador.
      * @param operador que puede ser +, -, *, /.
@@ -89,7 +56,7 @@ public class Expression extends Nodo implements visitaNodo {
     }
     /**
      * metodo que calcula la operacion de el resultado de una expresion y un numero.
-     * @param operador 
+     * @param operador que puede ser +, -, *, /.
      */
     private void calcular1Exp1NUM(String operador){
         switch (operador) {
@@ -110,7 +77,7 @@ public class Expression extends Nodo implements visitaNodo {
     }
     /**
      * metodo que calcula la operacion de el resultado de una expresion y un numero.
-     * @param operador 
+     * @param operador que puede ser +, -, *, /.
      */
     private void calcular1NUM1Exp(String operador){
         switch (operador) {
@@ -131,7 +98,7 @@ public class Expression extends Nodo implements visitaNodo {
     }
     /**
      * metodo que calcula el resultado de la operacion entre los resultados de las 2 expresiones.
-     * @param operador 
+     * @param operador que puede ser +, -, *, /.
      */
     private void calcular2Exp(String operador){
         switch (operador) {
@@ -150,6 +117,10 @@ public class Expression extends Nodo implements visitaNodo {
         }
 
     }
+    /**
+     * metodo que calcula las operaciones dependiendo del tipo de operacion.
+     * pueden ser operaciones con 2 numeros, 1 numero y 1 expresion, 1 expresion y un 1 numero o 2 expresiones.
+     */
     public void calculoValor(){
         //se verifica todas las posibilidades de operacion.
         //se verifica que operacion1 y operacion2 sean Var numero.
@@ -189,6 +160,11 @@ public class Expression extends Nodo implements visitaNodo {
             }
         }
     }
+    /**
+     * metodo que genera el codigo del nodo Expresion para Graphviz.
+     * @param contNodos la cantidad de nodods visitados.
+     * @return codigo Graphviz.
+     */
     public String toGrapher(int contNodos){
         //genero codigo segun el tipo de expresion.
         //en caso de que el nodo sea una expresion de calculo (+,-,*,/,**,^)
@@ -215,6 +191,7 @@ public class Expression extends Nodo implements visitaNodo {
         
     }
     
+    //metodos GET.
     
     public Nodo getOperador1(){
         return this.operacion1;
@@ -228,6 +205,8 @@ public class Expression extends Nodo implements visitaNodo {
     public boolean getEsComparacion(){
         return this.esComparacion;
     }
+    //metodos SET.
+    
     public void setEsComparacion(boolean flag){
         this.esComparacion=flag;
     }

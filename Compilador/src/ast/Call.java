@@ -9,21 +9,38 @@ import java.util.ArrayList;
 import syntaxVisitor.GrapherVisitor;
 
 /**
- * Clase Nodo que guarda los datos de llas gramaticas 31 a 33.
+ * Clase Nodo que guarda los datos de las gramaticas 31 a 33.
  * @author Jonathan Vasquez - Eduardo Tapia.
  */
 public class Call extends Nodo implements visitaNodo {
+    //variable que guarda el nombre de la funcion que se esta llamando.
     String ID;
-    ArrayList<Nodo> listaArgs= new ArrayList<Nodo>();
+    //Lista que guarda los argumentos.
+    ArrayList<Nodo> listaArgs= new ArrayList<Nodo>(); 
     
+    /**
+     * constructor 1.
+     */
     public Call(){}
     
+    /**
+     * metodo que agrega un nodo argumento en la lista de argumentos.
+     * @param Expression un argumento.
+     */
     public void agregarArgumento(Nodo Expression){
         this.listaArgs.add(Expression);
     }
+    /**
+     * metodo que modifica la id del llamado a funcion.
+     * @param id el nombre del nuevo llamado.
+     */
     public void setID(String id){
         this.ID=id;
     }
+    /**
+     * metodo que envia retorna la lista de argumentos.
+     * @return lista de argumentos.
+     */
     public ArrayList<Nodo> getArgs(){
         return this.listaArgs;
     }
