@@ -1,4 +1,10 @@
 int main(void){
-	int x ::= 1;
+	int a;
+	int b;
+
+	int funcion(void){
+		int x;
+		int z;
+	}
 }
 

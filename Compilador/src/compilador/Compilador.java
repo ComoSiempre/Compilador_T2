@@ -24,7 +24,7 @@ import syntaxVisitor.GrapherVisitor;
  * Proyecto correspondiente a la integracion de la fase de analisis Sintactico en la implementacion del compilador
  * para el lenguaje K*, utilizando el analizador sintactico Java CUP.
  * @author:     Jonatham Vasquez - Eduardo Tapia
- * @version:    31/10/2015/3.2.1.
+ * @version:    31/10/2015/3.1.1.
  */
 public class Compilador {
     /**
@@ -37,6 +37,10 @@ public class Compilador {
         //se llama al paquete Jflex para la generacion del lexer enviando como parametro el archivo FIle.
         jflex.Main.generate(file);
     }
+    /**
+     * metodo que genera el archivo java Parser.java, que contiene la nomenclatura del analisis sintactico.
+     * @param path la direccion donde se encuentra el archivo .cup
+     */
     public static void generarParser(String path){
         String[] asintactico = { "-parser", "Parser", path };
         try {
@@ -80,7 +84,7 @@ public class Compilador {
             System.out.println("\n*** Codigo lexer no existente ***\n");
         }
         return efectuado;
-    }
+    }//fin metodo 'moverLex'
     /**
      * metodo usado para trasladar los archivos generados en el analisis sintactico al paquete "parser"  
      * @param nombreParser el nombre "Parser.java"
@@ -108,7 +112,7 @@ public class Compilador {
             System.out.println("\n*** Codigo parser no existente ***\n");
         }
         return efectuado;
-    }
+    }//fin metodo 'moverParser'
     
     /**
      * metodo usado para mover los archivos a sus respectivos paquetes.
@@ -122,7 +126,7 @@ public class Compilador {
             System.exit(0);
         }
 	
-    }
+    }//fin metodo move.
     /**
      * metodo de separa el path de los ejercicion y obtiene solo el nombre del ejercicio.
      * @param pathEj direccion del ejercicio.
@@ -176,7 +180,7 @@ public class Compilador {
      * @param numEjercicio el numero actual del ejercicio a compilar.
      */
     public static void compilar(String pathEjercicio, String pathBase, int numEjercicio){
-        System.out.println("Comienzo compilacion");
+        System.out.println("Comienzo compilacion Ejercicio "+numEjercicio);
         File arch = new File(pathEjercicio);
         
         try{
@@ -218,9 +222,10 @@ public class Compilador {
         //se mueven los archivos a los paquetes correspondientes.
         move();
         //comienza compilacion de ejercicios.
-        for(int i=0; i<2; i++)
+        for(int i=0; i<7; i++)
             compilar(dir+"/ejemplo_"+(i+1)+".txt",dir,(i+1));
         
-    }
+        
+    }//fin Main.
     
-}
+}//fin Compilador.

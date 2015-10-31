@@ -10,20 +10,42 @@ digraph G {
 "nodo3"->"nodo4"; 
 "nodo5"[label="Compound Statement", color=deepskyblue]; 
 "nodo3"->"nodo5"; 
-"nodo6"[label="g:INT"]; 
+"nodo6"[label="a:INT"]; 
 "nodo5"->"nodo6"; 
-"nodo7"[label="::=
-Value: 1"]; 
+"nodo7"[label="b:INT"]; 
 "nodo5"->"nodo7"; 
-"nodo8"[label="Variable: g"]; 
-"nodo7"->"nodo8"; 
-"nodo9"[label="1"]; 
-"nodo7"->"nodo9"; 
-"nodo10"[label="::=
-Value: 23"]; 
-"nodo5"->"nodo10"; 
-"nodo11"[label="Variable: f"]; 
+"nodo8"[label="::=
+Value: 32"]; 
+"nodo5"->"nodo8"; 
+"nodo9"[label="Variable: a"]; 
+"nodo8"->"nodo9"; 
+"nodo10"[label="+
+Value: 32"]; 
+"nodo8"->"nodo10"; 
+"nodo11"[label="*
+Value: 24"]; 
 "nodo10"->"nodo11"; 
-"nodo12"[label="23"]; 
-"nodo10"->"nodo12"; 
+"nodo12"[label="+
+Value: 4"]; 
+"nodo11"->"nodo12"; 
+"nodo13"[label="1"]; 
+"nodo12"->"nodo13"; 
+"nodo14"[label="3"]; 
+"nodo12"->"nodo14"; 
+"nodo15"[label="6"]; 
+"nodo11"->"nodo15"; 
+"nodo16"[label="8"]; 
+"nodo10"->"nodo16"; 
+"nodo17"[label="::=
+Value: 3"]; 
+"nodo5"->"nodo17"; 
+"nodo18"[label="Variable: f"]; 
+"nodo17"->"nodo18"; 
+"nodo19"[label="/
+Value: 3"]; 
+"nodo17"->"nodo19"; 
+"nodo20"[label="6"]; 
+"nodo19"->"nodo20"; 
+"nodo21"[label="2"]; 
+"nodo19"->"nodo21"; 
 }

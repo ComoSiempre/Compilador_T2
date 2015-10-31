@@ -104,7 +104,7 @@ program             ::= declaration_list:dl
                             {:
                                 this.parser.cadena = "program ::= declaration_list \n"+this.parser.cadena;
                                 System.out.println("Fin de analisis sintactico");
-                                System.out.println(this.parser.cadena);
+                                //System.out.println(this.parser.cadena);
                                 RESULT = dl;
                             :};
 

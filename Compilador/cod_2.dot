@@ -1,23 +1,75 @@
 digraph G { 
 "nodo0"[label="Progama"]; 
-"nodo1"[label="d:INT"]; 
+"nodo1"[label="Funcion: fibonacci,int"]; 
 "nodo0"->"nodo1"; 
-"nodo2"[label="Funcion: f,int"]; 
-"nodo0"->"nodo2"; 
+"nodo2"[label="Param[largo,int]"]; 
+"nodo1"->"nodo2"; 
 "nodo3"[label="Compound Statement", color=deepskyblue]; 
-"nodo2"->"nodo3"; 
-"nodo4"[label="::=
-Value: 45"]; 
+"nodo1"->"nodo3"; 
+"nodo4"[label="fib1:INT"]; 
 "nodo3"->"nodo4"; 
-"nodo5"[label="Variable: d"]; 
-"nodo4"->"nodo5"; 
-"nodo6"[label="45"]; 
-"nodo4"->"nodo6"; 
-"nodo7"[label="::=
-Value: 34"]; 
-"nodo3"->"nodo7"; 
-"nodo8"[label="Variable: f"]; 
-"nodo7"->"nodo8"; 
-"nodo9"[label="34"]; 
-"nodo7"->"nodo9"; 
+"nodo5"[label="fib2:INT"]; 
+"nodo3"->"nodo5"; 
+"nodo6"[label="::=
+Value: 1"]; 
+"nodo3"->"nodo6"; 
+"nodo7"[label="Variable: fib1"]; 
+"nodo6"->"nodo7"; 
+"nodo8"[label="1"]; 
+"nodo6"->"nodo8"; 
+"nodo9"[label="::=
+Value: 2"]; 
+"nodo3"->"nodo9"; 
+"nodo10"[label="Variable: fib2"]; 
+"nodo9"->"nodo10"; 
+"nodo11"[label="2"]; 
+"nodo9"->"nodo11"; 
+"nodo12"[label="for"]; 
+"nodo3"->"nodo12"; 
+"nodo13"[label="::=
+Value: 2"]; 
+"nodo12"->"nodo13"; 
+"nodo14"[label="Variable: i"]; 
+"nodo13"->"nodo14"; 
+"nodo15"[label="2"]; 
+"nodo13"->"nodo15"; 
+"nodo16"[label="LEQ"]; 
+"nodo12"->"nodo16"; 
+"nodo17"[label="Variable: i"]; 
+"nodo16"->"nodo17"; 
+"nodo18"[label="Variable: largo"]; 
+"nodo16"->"nodo18"; 
+"nodo19"[label="+
+Value: 0"]; 
+"nodo12"->"nodo19"; 
+"nodo20"[label="Variable: i"]; 
+"nodo19"->"nodo20"; 
+"nodo21"[label="1"]; 
+"nodo19"->"nodo21"; 
+"nodo22"[label="Compound Statement", color=deepskyblue]; 
+"nodo12"->"nodo22"; 
+"nodo23"[label="::=
+Value: 0"]; 
+"nodo22"->"nodo23"; 
+"nodo24"[label="Variable: fib2"]; 
+"nodo23"->"nodo24"; 
+"nodo25"[label="+
+Value: 0"]; 
+"nodo23"->"nodo25"; 
+"nodo26"[label="Variable: fib1"]; 
+"nodo25"->"nodo26"; 
+"nodo27"[label="Variable: fib2"]; 
+"nodo25"->"nodo27"; 
+"nodo28"[label="::=
+Value: 0"]; 
+"nodo22"->"nodo28"; 
+"nodo29"[label="Variable: fib1"]; 
+"nodo28"->"nodo29"; 
+"nodo30"[label="-
+Value: 0"]; 
+"nodo28"->"nodo30"; 
+"nodo31"[label="Variable: fib2"]; 
+"nodo30"->"nodo31"; 
+"nodo32"[label="Variable: fib1"]; 
+"nodo30"->"nodo32"; 
 }

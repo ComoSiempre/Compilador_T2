@@ -1,34 +1,14 @@
-public class listaDoble {
-     private nodo primer,ultimo;
-            public listaDoble() {
-                        primer::=null;
-                       ultimo::=null;
+void ordenar(void) {
+        int k;
+        for(k ::= 0,k LT 4,k+1) {
+            int f;
+            for(f ::= 0,f LT 4-k,f+1) {
+                if (sueldos[f] GT sueldos[f+1]) {
+                    int aux;
+                    aux::=sueldos[f];
+                    sueldos[f]::=sueldos[f+1];
+                    sueldos[f+1]::=aux;
+                }
             }
-
-		    public boolean listaVacia()
-            {
-                        if(primerEQnull || ultimoEQnull)
-                                   return true;
-                        else
-                                   return false;
-            }
-	        public void insertarInicioLista(int entrada)
-            {
-                        nodo nuevo;
-                        nuevo::=new Nodo(entrada);
-                        if(ListaVacia())
-                        {
-                                   primer::=nuevo;
-                                   ultimo::=nuevo;
-                        }
-                        else
-                        {
-                        nuevo.adelante::=primer;
-                        primer.atras::=nuevo;
-                       primer::=nuevo;
-                        }
-                        primer.atras::=null;
-                        ultimo.adelante::=null;
-		    }
-
+      }
 }

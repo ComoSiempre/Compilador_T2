@@ -1,6 +1,12 @@
-%este es el ordenamiento burbuja
-int d;
-int f(void){
-	d::= 45;
-	f::= 34;
+int fibonacci(int largo){
+  int fib1;
+  Int fib2;
+  fib1 ::= 1;
+  fib2 ::= 2;
+
+  FOR(i ::= 2, i LEQ largo , i + 1){
+    fib2 ::= fib1 + fib2;
+    fib1 ::= fib2 - fib1;
+  }
+
 }
