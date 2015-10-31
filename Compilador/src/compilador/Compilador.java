@@ -12,10 +12,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import ast.*;
 import Tables.*;
-import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.Scanner;
 import java_cup.runtime.Symbol;
 import parser.*;
 import scanner.*;
@@ -205,14 +204,15 @@ public class Compilador {
         }//fin try.
     }//fin funcion compilar.
     
-    public static void menu(String dir) throws IOException{
+    /**
+     * metodo Menu, usado como intefaz usuario-sistema.
+     * @param dir la direccion base del proyecto, nesesario para el proceso de compilacion.
+     * @param in scanner de lectura, nesesario para la lectura por teclado de las opciones.
+     * @throws IOException 
+     */
+    public static void menu(String dir, Scanner in) throws IOException{
         boolean flag=true;
-        int sel=0;
-        //creo el objeto Scanner para la lectura desde teclado, gracias al System.in.
-        InputStreamReader isr = new InputStreamReader(System.in);
-        BufferedReader br = new BufferedReader (isr);
-        
-        
+        String sel="";
         do{
             System.out.println("***********************Taller 2: Analisis Sintactico *******************************");
             System.out.println("************************************************************************************");
@@ -226,47 +226,46 @@ public class Compilador {
             System.out.println("7.- Ejercicio_7.txt");
             System.out.println("8.- Salir");
             System.out.println("Seleccionar un ejercicio a compilar:");
-            String seleccion = br.readLine();
-            sel = Integer.parseInt(seleccion);
-            
-            switch(sel){
-                case 1:
+            sel = in.nextLine();
+            char[] s = sel.toCharArray();
+            switch(s[0]){
+                case '1':
                     compilar(dir+"/ejemplo_1.txt",dir,1);
                     break;
-                case 2:
+                case '2':
                     compilar(dir+"/ejemplo_2.txt",dir,2);
                     break;
-                case 3:
+                case '3':
                     compilar(dir+"/ejemplo_3.txt",dir,3);
                     break;
-                case 4:
+                case '4':
                     compilar(dir+"/ejemplo_4.txt",dir,4);
                     break;
-                case 5:
+                case'5':
                     compilar(dir+"/ejemplo_5.txt",dir,5);
                     break;
-                case 6:
+                case '6':
                     compilar(dir+"/ejemplo_6.txt",dir,6);
                     break;
-                case 7:
+                case '7':
                     compilar(dir+"/ejemplo_7.txt",dir,7);
                     break;
-                case 8:
+                case '8':
                     flag=false;
                     break;
                 default:
                     System.out.println("Seleccionar un ejemplo valido:");
                     break;
-                 
-            }
+            }//fin switch.
         }while(flag);
         
-    }
+    }//fin metodo 'menu'
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) throws Exception {
-        // TODO code application logic here
+        //creo el objeto Scanner para la lectura desde teclado, gracias al System.in.
+        Scanner in = new Scanner(System.in );
         //variable donde obtengo la direccion del proyecto.
         final String dir =System.getProperty("user.dir");
         //variable usada para guardar la direccion del archivo .flex
@@ -280,13 +279,7 @@ public class Compilador {
         //se mueven los archivos a los paquetes correspondientes.
         move();
         //comienza compilacion de ejercicios.
-        menu(dir);
-        
-        
-        
-        
-        
-        
+        menu(dir, in);
     }//fin Main.
     
 }//fin Compilador.
