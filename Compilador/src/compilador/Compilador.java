@@ -12,8 +12,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import ast.*;
 import Tables.*;
+import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java_cup.runtime.Symbol;
 import parser.*;
 import scanner.*;
@@ -203,7 +205,63 @@ public class Compilador {
         }//fin try.
     }//fin funcion compilar.
     
-    
+    public static void menu(String dir) throws IOException{
+        boolean flag=true;
+        int sel=0;
+        //creo el objeto Scanner para la lectura desde teclado, gracias al System.in.
+        InputStreamReader isr = new InputStreamReader(System.in);
+        BufferedReader br = new BufferedReader (isr);
+        
+        
+        do{
+            System.out.println("***********************Taller 2: Analisis Sintactico *******************************");
+            System.out.println("************************************************************************************");
+            System.out.println("************************************************************************************");
+            System.out.println("1.- Ejercicio_1.txt");
+            System.out.println("2.- Ejercicio_2.txt");
+            System.out.println("3.- Ejercicio_3.txt");
+            System.out.println("4.- Ejercicio_4.txt");
+            System.out.println("5.- Ejercicio_5.txt");
+            System.out.println("6.- Ejercicio_6.txt");
+            System.out.println("7.- Ejercicio_7.txt");
+            System.out.println("8.- Salir");
+            System.out.println("Seleccionar un ejercicio a compilar:");
+            String seleccion = br.readLine();
+            sel = Integer.parseInt(seleccion);
+            
+            switch(sel){
+                case 1:
+                    compilar(dir+"/ejemplo_1.txt",dir,1);
+                    break;
+                case 2:
+                    compilar(dir+"/ejemplo_2.txt",dir,2);
+                    break;
+                case 3:
+                    compilar(dir+"/ejemplo_3.txt",dir,3);
+                    break;
+                case 4:
+                    compilar(dir+"/ejemplo_4.txt",dir,4);
+                    break;
+                case 5:
+                    compilar(dir+"/ejemplo_5.txt",dir,5);
+                    break;
+                case 6:
+                    compilar(dir+"/ejemplo_6.txt",dir,6);
+                    break;
+                case 7:
+                    compilar(dir+"/ejemplo_7.txt",dir,7);
+                    break;
+                case 8:
+                    flag=false;
+                    break;
+                default:
+                    System.out.println("Seleccionar un ejemplo valido:");
+                    break;
+                 
+            }
+        }while(flag);
+        
+    }
     /**
      * @param args the command line arguments
      */
@@ -222,8 +280,9 @@ public class Compilador {
         //se mueven los archivos a los paquetes correspondientes.
         move();
         //comienza compilacion de ejercicios.
-        for(int i=0; i<7; i++)
-            compilar(dir+"/ejemplo_"+(i+1)+".txt",dir,(i+1));
+        menu(dir);
+        
+        
         
         
         
